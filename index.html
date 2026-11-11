@@ -1,8 +1,7 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
 <meta charset="utf-8">
-<!-- Family lists launcher (GL1). Engine Room / Build family shared lists app, 2026-11-07 PT. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Our Lists</title>
@@ -12,40 +11,469 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Our Lists">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#121714" media="(prefers-color-scheme: dark)">
-<style>
-  html,body{margin:0;height:100%;background:#f6f4ef;font-family:system-ui,-apple-system,sans-serif;color:#1f2a24}
-  @media (prefers-color-scheme: dark){html,body{background:#121714;color:#eef3ef}}
-  iframe{position:fixed;inset:0;width:100%;height:100%;border:0}
-  .msg{max-width:420px;margin:0 auto;padding:80px 24px;text-align:center;line-height:1.5}
-  .msg img{width:120px;height:120px;border-radius:28px}
-</style>
+<meta name="theme-color" content="#fbf8f3">
 <script src="config.js"></script>
+<!-- Family Lists (GL1) web app page. Engine Room / Continue family grocery list app. GL1.6 look: Mon Nov 9 2026 12:40 AM PT; GL1.7 Tue Nov 10 9:30 AM PT: cart ticks keep aisle colour, toast always dark
+     (Lucas: simple, colourful, practical for Brittany). Each list has its own colour, each aisle its own colour,
+     in-app dialogs (no browser pop-ups), Usuals quick-add, Undo on remove, cart progress bar. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbf8f3; --card:#ffffff; --ink:#22262a; --muted:#737b83; --line:#ece6dc;
+  --accent:#2f9e6e; --accent-ink:#ffffff; --done:#a9b0b6; --warn:#d6453d;
+  --green:#2e9e5b; --red:#d6453d; --amber:#d99a1e;
+  --accent-soft:color-mix(in srgb, var(--accent) 13%, var(--card));
+  --shadow:0 1px 2px rgba(34,38,42,.05),0 6px 20px rgba(34,38,42,.07);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#14171a; --card:#1e2226; --ink:#eef1f3; --muted:#9aa3ab; --line:#2c3238; --done:#5f676e; --warn:#f06a5f;
+    --green:#4cc27e; --red:#f06a5f; --amber:#f0b545;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.3); }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,-apple-system,sans-serif;font-size:17px}
+button{font-family:inherit}
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
+.top::before{content:"";display:block;height:5px;background:var(--accent);transition:background .3s}
+header{padding:calc(12px + env(safe-area-inset-top)) 16px 0;display:flex;align-items:center;gap:12px;max-width:640px;margin:0 auto}
+.badge{width:44px;height:44px;border-radius:14px;background:var(--accent-soft);display:grid;place-items:center;font-size:24px;flex:none;transition:background .3s}
+.htxt{flex:1;min-width:0}
+h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+.sub{color:var(--muted);font-size:14px;font-weight:600}
+.prog{max-width:640px;margin:10px auto 0;padding:0 16px;display:none}
+.prog.on{display:block}
+.prog .track{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.prog .fill{height:100%;border-radius:99px;background:var(--accent);transition:width .35s}
+main{padding:6px 16px 150px;max-width:640px;margin:0 auto}
+.section{margin-top:18px}
+.section h2{font-size:14px;font-weight:800;color:var(--cc,var(--muted));margin:0 2px 8px;display:flex;gap:8px;align-items:center}
+.section h2 .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px 5px 8px;border-radius:99px;background:color-mix(in srgb, var(--cc,var(--muted)) 14%, var(--card))}
+.section h2 .n{color:var(--muted);font-weight:700;font-size:13px}
+.card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;border-left:5px solid var(--cc,transparent)}
+.item{display:flex;align-items:center;gap:12px;padding:13px 6px 13px 14px;border-top:1px solid var(--line);min-height:58px;cursor:pointer}
+.item:first-child{border-top:0}
+.box{width:28px;height:28px;border-radius:50%;border:2.5px solid color-mix(in srgb, var(--cc,var(--accent)) 55%, var(--line));flex:none;display:grid;place-items:center;transition:transform .15s,background .15s}
+.item.done .box{background:var(--cc,var(--accent));border-color:var(--cc,var(--accent))}
+.item.done .box::after{content:"";width:7px;height:13px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.item.pop .box{animation:pop .3s}
+@keyframes pop{40%{transform:scale(1.25)}}
+.name{flex:1;font-weight:700;line-height:1.25;min-width:0}
+.meta{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted);font-weight:600;margin-top:3px}
+.who-dot{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;color:#fff;font-size:10px;font-weight:800}
+.item.done .name{color:var(--done);text-decoration:line-through}
+.more{border:0;background:none;color:var(--muted);font-size:22px;padding:6px 10px;border-radius:10px}
+.empty{text-align:center;color:var(--muted);padding:56px 20px;font-weight:600}
+.empty b{display:block;font-size:52px;margin-bottom:10px}
+.clear{display:block;margin:18px auto 0;border:0;background:var(--accent-soft);color:var(--ink);font:inherit;font-weight:700;font-size:15px;padding:11px 20px;border-radius:999px}
+.usuals{margin-top:14px}
+.usuals .lab{font-size:13px;font-weight:800;color:var(--muted);margin:0 2px 8px}
+.urow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.urow::-webkit-scrollbar{display:none}
+.uchip{flex:none;border:0;background:var(--accent-soft);color:var(--ink);font:inherit;font-weight:700;font-size:15px;padding:9px 14px;border-radius:999px;white-space:nowrap}
+.uchip b{color:var(--accent);margin-right:4px}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:linear-gradient(to top,var(--bg) 70%,transparent);
+  padding:14px 12px calc(12px + env(safe-area-inset-bottom))}
+.bar form{max-width:640px;margin:0 auto;display:flex;gap:8px;background:var(--card);border-radius:999px;box-shadow:var(--shadow);padding:6px;border:2px solid var(--accent-soft)}
+.bar input{flex:1;border:0;background:transparent;color:var(--ink);font:inherit;font-weight:600;padding:10px 12px;outline:none;min-width:0}
+.round{width:46px;height:46px;border-radius:50%;border:0;display:grid;place-items:center;flex:none}
+.mic{background:var(--accent-soft);color:var(--accent)}
+.mic.on{background:var(--warn);color:#fff;animation:pulse 1.2s infinite}
+.add{background:var(--accent);color:var(--accent-ink);font-size:26px;font-weight:700}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);opacity:0;background:#22262a;color:#fff;
+  padding:11px 16px;border-radius:14px;font-size:15px;font-weight:700;transition:.25s;max-width:92vw;z-index:30;pointer-events:none;display:flex;gap:14px;align-items:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.toast.act{pointer-events:auto}
+.toast button{border:0;background:none;color:var(--accent);font:inherit;font-weight:800;padding:2px 4px;filter:brightness(1.35)}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:10;display:none}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:11;background:var(--card);border-radius:22px 22px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:.25s;max-width:640px;margin:0 auto}
+.sheet.open{transform:none}.sheet-bg.open{display:block}
+.sheet h3{margin:0 0 4px;font-size:21px;font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.chip{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-weight:700;font-size:14px;padding:8px 12px;border-radius:999px}
+.chip.sel{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip[data-cat]{border-color:color-mix(in srgb, var(--cc) 45%, var(--line))}
+.chip[data-cat].sel{background:var(--cc);border-color:var(--cc);color:#fff}
+.row2{display:flex;gap:8px}
+.row2 button{flex:1;font:inherit;font-weight:700;padding:12px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink)}
+.row2 .danger{color:var(--warn)}
+.who{display:flex;gap:10px;justify-content:center;margin-top:16px}
+.who button{font:inherit;font-weight:800;font-size:18px;padding:14px 26px;border-radius:16px;border:0;color:#fff}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 2px;scrollbar-width:none;max-width:640px;margin:0 auto}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;border:2px solid transparent;background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:15px;padding:7px 14px;border-radius:999px;white-space:nowrap;box-shadow:var(--shadow)}
+.tab.sel{background:var(--tc);color:#fff;border-color:var(--tc)}
+.tab .n{display:inline-block;min-width:20px;margin-left:6px;padding:0 6px;border-radius:99px;font-size:12px;line-height:20px;text-align:center;background:color-mix(in srgb, var(--tc) 18%, var(--card));color:var(--ink)}
+.tab.sel .n{background:rgba(255,255,255,.28);color:#fff}
+.tab.new{box-shadow:none;border:2px dashed var(--line);background:none;color:var(--muted)}
+.day{display:flex;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.day:first-child{border-top:0}.day.past{opacity:.5}.day.today{background:var(--accent-soft)}
+.dl{flex:none;width:64px;font-weight:800;font-size:14px;line-height:1.3}.dl small{display:block;color:var(--muted);font-weight:600}
+.dm{flex:1;min-width:0}.slot{display:block;width:100%;text-align:left;border:0;background:none;color:var(--ink);font:inherit;font-weight:600;font-size:15px;padding:3px 0;line-height:1.3}
+.slot b{font-weight:800;color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-right:6px}.slot.empty{color:var(--muted)}
+.pref{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 6px 6px 12px;margin:0 6px 8px 0;font-size:14px;font-weight:700}
+.pref button{border:0;background:var(--bg);color:var(--muted);border-radius:50%;width:26px;height:26px;font-size:13px}
+.pp{margin:10px 4px 2px;font-weight:800;font-size:14px}.hint{color:var(--muted);font-size:13px;font-weight:600;margin:10px 4px}
+.row3{display:flex;gap:8px;margin-top:14px}.row3 button{flex:1;font:inherit;font-weight:700;font-size:15px;padding:10px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
+.sheet{max-height:88vh;overflow-y:auto}
+.gbtn{display:block;width:100%;margin-top:12px;font:inherit;font-weight:800;font-size:16px;padding:14px;border-radius:999px;border:0;background:var(--accent);color:var(--accent-ink)}
+.gi{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);font:inherit;padding:11px 4px}
+.gi:first-child{border-top:0}.gi .dot{width:16px;height:16px;border-radius:50%;flex:none}
+.gi.need .dot{background:var(--red)}.gi.have .dot{background:var(--green)}.gi.list .dot{background:var(--amber)}
+.gi .gn{flex:1;min-width:0;font-weight:700}.gi .gw{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gi.have .gn{color:var(--muted)}.gi .st{font-size:13px;font-weight:700;color:var(--muted)}
+.legend{display:flex;gap:14px;font-size:13px;font-weight:700;color:var(--muted);margin:8px 0 6px;flex-wrap:wrap}.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.wk{display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap}
+#gadd{position:sticky;bottom:0;box-shadow:0 -10px 14px var(--card)}
+.gcheck{position:sticky;top:-18px;z-index:2;background:var(--card);padding:8px 0 6px;margin-top:4px}
+.gcheck form{display:flex;gap:8px;align-items:center;border:2px solid var(--accent-soft);border-radius:999px;padding:4px}
+.gcheck input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-weight:600;padding:8px 10px;outline:none}
+.gcheck .round{width:40px;height:40px}.gcheck .hint2{font-size:12px;font-weight:600;color:var(--muted);margin:5px 4px 0}
+.gi .amt{font-weight:800;color:var(--ink)}
+/* in-app dialog (GL1.6: replaces the browser's confirm/prompt boxes) */
+.dlg-bg{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;padding:20px}
+.dlg-bg.open{display:flex}
+.dlg{width:100%;max-width:380px;background:var(--card);border-radius:22px;padding:20px 18px 16px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:rise .18s}
+@keyframes rise{from{transform:translateY(12px);opacity:0}}
+.dlg h4{margin:0 0 6px;font-size:19px;font-weight:800}
+.dlg p{margin:0 0 12px;color:var(--muted);font-size:15px;font-weight:600}
+.dlg input{width:100%;font:inherit;font-weight:600;font-size:17px;padding:12px 14px;border-radius:14px;border:2px solid var(--accent-soft);background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px}
+.dlg input:focus{border-color:var(--accent)}
+.dlg .btns{display:flex;flex-direction:column;gap:8px}
+.dlg .btns button{font:inherit;font-weight:800;font-size:16px;padding:13px;border-radius:14px;border:0;background:var(--bg);color:var(--ink)}
+.dlg .btns .main{background:var(--accent);color:var(--accent-ink)}
+.dlg .btns .danger{background:var(--warn);color:#fff}
+</style>
 </head>
 <body>
-<div class="msg" id="msg"><img src="icon-192.png" alt=""><p>Loading your lists&hellip;</p></div>
+<div class="top">
+  <header><div class="badge" id="badge"></div><div class="htxt"><h1 id="title">Shopping</h1><div class="sub" id="sub">Loading&#x2026;</div></div></header>
+  <div class="prog" id="prog"><div class="track"><div class="fill" id="pfill" style="width:0"></div></div></div>
+  <nav class="tabs" id="tabs"></nav>
+</div>
+<main id="list"></main>
+
+<div class="bar"><form id="f" autocomplete="off">
+  <button type="button" class="round mic" id="mic" aria-label="Speak items">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+  </button>
+  <input id="t" placeholder="Add milk, eggs, bananas&#x2026;" enterkeyhint="done">
+  <button class="round add" aria-label="Add">+</button>
+</form></div>
+
+<div class="toast" id="toast"></div>
+<div class="sheet-bg" id="sbg"></div>
+<div class="sheet" id="sheet"></div>
+<div class="dlg-bg" id="dlgbg"><div class="dlg" id="dlg"></div></div>
+
 <script>
-(function () {
-  var key = '';
-  var m = location.hash.match(/k=([A-Za-z0-9]+)/);
-  if (m) key = m[1];
-  try { if (key) localStorage.setItem('gl_key', key); else key = localStorage.getItem('gl_key') || ''; } catch (e) {}
-  var msg = document.getElementById('msg');
-  if (!key || !window.GL_EXEC || /PASTE/.test(window.GL_EXEC)) {
-    msg.innerHTML = '<img src="icon-192.png" alt=""><p><b>Open the full link Lucas sent you</b> once, then add it to your home screen.</p>';
-    return;
+if (!/k=/.test(location.hash)) { try { if (!localStorage.getItem('gl_key')) document.addEventListener('DOMContentLoaded', function(){ document.body.innerHTML = '<p style="font-family:sans-serif;padding:60px 24px;text-align:center;line-height:1.5"><b>Open the full link Lucas sent you</b> once, then add it to your home screen.</p>'; }); } catch(e) {} }
+</script>
+<script>
+function E(){ return String.fromCodePoint.apply(null, arguments); }
+var KEY = ''; (function(){ var m = location.hash.match(/k=([A-Za-z0-9]+)/); if (m) KEY = m[1];
+  try { if (KEY) localStorage.setItem('gl_key', KEY); else KEY = localStorage.getItem('gl_key') || ''; } catch(e) {}
+  if (KEY && !m && history.replaceState) history.replaceState(null, '', '#k=' + KEY); })();
+var EMOJI = {"Produce":E(0x1f96c),"Bakery":E(0x1f956),"Deli":E(0x1f96a),"Meat & Seafood":E(0x1f969),"Dairy & Eggs":E(0x1f95b),"Frozen":E(0x1f9ca),"Pasta, Rice & Grains":E(0x1f35d),
+  "Canned & Jarred":E(0x1f96b),"Baking & Spices":E(0x1f9c2),"Condiments":E(0x1f36f),"Breakfast & Cereal":E(0x1f963),"Snacks":E(0x1f37f),"Drinks":E(0x1f9c3),"Household":E(0x1f9fb),
+  "Personal Care":E(0x1f9f4),"Baby & Kids":E(0x1f37c),"Pet":E(0x1f43e),"Hardware & Garden":E(0x1f528),"Other":E(0x1f6d2)};
+/* GL1.6 colours: every aisle and every list gets its own. */
+var CAT_COLOR = {"Produce":"#38a85a","Bakery":"#d98a2b","Deli":"#e2694b","Meat & Seafood":"#d94a5f","Dairy & Eggs":"#3d8fe0","Frozen":"#1fb3d1","Pasta, Rice & Grains":"#c79a1c",
+  "Canned & Jarred":"#b8693a","Baking & Spices":"#a8703f","Condiments":"#e0a02a","Breakfast & Cereal":"#ec7f2d","Snacks":"#e5508f","Drinks":"#5b74e6","Household":"#7c64e0",
+  "Personal Care":"#bb5bd6","Baby & Kids":"#ef7fae","Pet":"#8c785f","Hardware & Garden":"#5f7a8f","Other":"#8a9199"};
+var LIST_COLOR = {"Shopping":"#2f9e6e","Gift Ideas":"#e0457b","Notes":"#e09b00","Meals":"#f0652f"};
+var EXTRA_COLORS = ["#4f7cff","#8b5cf6","#14a7a0","#e05a9b","#3fa34d"];
+var WHO_COLOR = {"Lucas":"#3d8fe0","Brittany":"#a24fe0"};
+var state = {rows:[], order:[], lists:[], counts:{}, sorted:true, list:'Shopping', usuals:[]};
+var meals = null; var MEALS = 'Meals';
+var cur = 'Shopping'; try { cur = localStorage.getItem('gl_list') || 'Shopping'; } catch(e) {}
+var who = null; try { who = localStorage.getItem('gl_who'); } catch(e) {}
+var $ = function(id){ return document.getElementById(id); };
+
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function toast(msg, label, fn){ var t=$('toast'); t.innerHTML=''; var sp=document.createElement('span'); sp.textContent=msg; t.appendChild(sp);
+  t.classList.toggle('act', !!label);
+  if (label){ var b=document.createElement('button'); b.textContent=label; b.onclick=function(){ t.classList.remove('show','act'); fn(); }; t.appendChild(b); }
+  t.classList.add('show'); clearTimeout(toast.h); toast.h=setTimeout(function(){t.classList.remove('show','act');}, label ? 5000 : 2600); }
+/* GitHub copy: plain fetch POST (text/plain, no cookies) to the web app's JSON door. */
+function call(fn){ var a=[].slice.call(arguments,1);
+  return fetch(window.GL_EXEC, {method:'POST', credentials:'omit', redirect:'follow', body: JSON.stringify({k:a[0], fn:fn, args:a.slice(1)})})
+    .then(function(r){ return r.text(); })
+    .then(function(t){ var j; try { j = JSON.parse(t); } catch(e) { oldApp(); throw new Error('Bad reply: ' + t.slice(0,80)); }
+      if (!j.ok) throw new Error(j.error || 'Error'); return j.data; }); }
+/* Until the web app has its JSON door, fall back to the old full-page app. */
+function oldApp(){ if (oldApp.done || !KEY) return; oldApp.done = true; document.body.innerHTML = '';
+  var f = document.createElement('iframe'); f.src = window.GL_EXEC + '?k=' + encodeURIComponent(KEY); f.allow = 'microphone; clipboard-write';
+  f.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:0'; document.body.appendChild(f); }
+function fail(e){ toast('Could not reach the list. Check your connection.'); console.log(e); }
+function listColor(name){
+  if (LIST_COLOR[name]) return LIST_COLOR[name];
+  var i = 0; for (var j=0;j<name.length;j++) i += name.charCodeAt(j); return EXTRA_COLORS[i % EXTRA_COLORS.length];
+}
+function listEmoji(name){ if (name===MEALS) return E(0x1f37d); var l = state.lists.filter(function(x){return x.name===name;})[0]; return (l && l.emoji) || E(0x1f4cb); }
+
+/* GL1.6 in-app dialog. ask({title, text, input, value, placeholder, buttons:[{label, value, kind:'main'|'danger'}]}) -> Promise(value or null) */
+function ask(o){
+  return new Promise(function(done){
+    var btns = o.buttons || [{label:o.ok||'OK', value:true, kind:o.danger?'danger':'main'}];
+    $('dlg').innerHTML = '<h4>'+esc(o.title)+'</h4>'+(o.text?'<p>'+esc(o.text)+'</p>':'')+
+      (o.input?'<input id="dlgin" placeholder="'+esc(o.placeholder||'')+'" enterkeyhint="done">':'')+
+      '<div class="btns">'+btns.map(function(b,i){ return '<button class="'+(b.kind||'')+'" data-b="'+i+'">'+esc(b.label)+'</button>'; }).join('')+
+      '<button data-b="x">Cancel</button></div>';
+    $('dlgbg').classList.add('open');
+    var inp = $('dlgin'); if (inp){ inp.value = o.value || ''; setTimeout(function(){ inp.focus(); if (inp.select) inp.select(); }, 60); }
+    function close(v){ $('dlgbg').classList.remove('open'); done(v); }
+    $('dlg').querySelectorAll('[data-b]').forEach(function(b){ b.onclick = function(){
+      if (b.dataset.b==='x') return close(null);
+      var bt = btns[+b.dataset.b]; close(o.input && bt.value===true ? inp.value : bt.value); }; });
+    if (inp) inp.onkeydown = function(e){ if (e.key==='Enter'){ e.preventDefault(); close(inp.value); } };
+    $('dlgbg').onclick = function(e){ if (e.target===$('dlgbg')) close(null); };
+  });
+}
+
+function applyTheme(){
+  var c = listColor(cur), r = document.documentElement.style;
+  r.setProperty('--accent', c);
+  r.setProperty('--accent-ink', c===LIST_COLOR.Notes ? '#2b2100' : '#ffffff');
+  $('badge').textContent = listEmoji(cur);
+}
+function renderTabs(){
+  var ls = state.lists.length ? state.lists : [{name:'Shopping',emoji:E(0x1f6d2)}];
+  $('tabs').innerHTML = ls.map(function(l){ var n=state.counts[l.name]||0; return '<button class="tab'+(l.name===cur?' sel':'')+'" style="--tc:'+listColor(l.name)+'" data-list="'+esc(l.name)+'">'+(l.emoji?l.emoji+' ':'')+esc(l.name)+(n?'<span class="n">'+n+'</span>':'')+'</button>'; }).join('')+
+    '<button class="tab'+(cur===MEALS?' sel':'')+'" style="--tc:'+LIST_COLOR.Meals+'" data-list="Meals">'+E(0x1f37d)+' Meals</button>'+
+    '<button class="tab new" id="newlist">+ New list</button>';
+  var sel=document.querySelector('.tab.sel'); if(sel&&sel.scrollIntoView) sel.scrollIntoView({block:'nearest',inline:'center'});
+  $('title').textContent = cur;
+  applyTheme();
+  $('t').placeholder = cur===MEALS ? 'Say "Lexi doesn\'t want ham anymore"' : state.sorted ? 'Add milk, eggs, bananas...' : 'Add a note...';
+}
+function render(){
+  renderTabs();
+  if (cur===MEALS){ $('prog').classList.remove('on'); renderMeals(); return; }
+  var rows = state.rows, open = rows.filter(function(r){return !r.checked;}), done = rows.filter(function(r){return r.checked;});
+  $('sub').textContent = !rows.length ? 'Nothing here yet' : open.length ? (open.length + (open.length===1?' item':' items') + (state.sorted && done.length ? ' to go, '+done.length+' in the cart' : '')) : 'All done! '+E(0x1f389);
+  $('prog').classList.toggle('on', state.sorted && rows.length > 0);
+  $('pfill').style.width = rows.length ? Math.round(100*done.length/rows.length)+'%' : '0';
+  var html = usualsHtml();
+  if (!rows.length){ $('list').innerHTML = html + '<div class="empty"><b>'+(state.sorted?E(0x1f9fa):listEmoji(cur))+'</b>'+esc(cur)+' is empty.<br>Tap the mic or type below.</div>'; wireUsuals(); return; }
+  if (state.sorted){
+    var groups = {}; open.forEach(function(r){ (groups[r.category]=groups[r.category]||[]).push(r); });
+    var cats = state.order.filter(function(c){return groups[c];}).concat(Object.keys(groups).filter(function(c){return state.order.indexOf(c)<0;}));
+    html += cats.map(function(c){ return section(c, groups[c], CAT_COLOR[c]||CAT_COLOR.Other, EMOJI[c]||E(0x1f6d2)); }).join('');
+  } else { html += open.length ? section('', open, listColor(cur), '') : ''; }
+  if (done.length){ html += section(state.sorted ? 'In the cart' : 'Done', done, '#9aa3ab', E(0x2705)) + '<button class="clear" id="clr">Clear '+done.length+' from the list</button>'; }
+  $('list').innerHTML = html;
+  wireUsuals();
+  if ($('clr')) $('clr').onclick = function(){ state.rows = state.rows.filter(function(r){return !r.checked;}); render(); call('apiClearChecked',KEY,cur).then(set).catch(fail); };
+}
+function usualsHtml(){
+  var u = (state.usuals||[]).filter(function(x){ return !state.rows.some(function(r){ return !r.checked && r.item.toLowerCase()===x.toLowerCase(); }); });
+  if (!state.sorted || !u.length) return '';
+  return '<div class="usuals"><div class="lab">'+E(0x2b50)+' Usuals, tap to add</div><div class="urow">'+u.map(function(x){ return '<button class="uchip" data-usual="'+esc(x)+'"><b>+</b>'+esc(x)+'</button>'; }).join('')+'</div></div>';
+}
+function wireUsuals(){
+  $('list').querySelectorAll('[data-usual]').forEach(function(b){ b.onclick = function(e){ e.stopPropagation(); var x = b.dataset.usual;
+    state.usuals = state.usuals.filter(function(u){ return u!==x; }); b.remove(); add(x); }; });
+}
+function whoDot(by){ if (!by) return ''; var c = WHO_COLOR[by] || '#8a9199'; return '<span class="who-dot" style="background:'+c+'">'+esc(by.charAt(0).toUpperCase())+'</span>'; }
+function section(title, items, color, emoji){
+  return '<div class="section" style="--cc:'+color+'">'+(title?'<h2><span class="pill">'+(emoji?emoji+' ':'')+esc(title)+'</span><span class="n">'+items.length+'</span></h2>':'')+'<div class="card">'+items.map(function(r){
+    var meta = [whoDot(r.by), esc([r.by, r.source==='Web app'?'':r.source].filter(Boolean).join(' '+E(0xb7)+' '))].join('');
+    var ic = r.checked ? (state.sorted ? (CAT_COLOR[r.category]||CAT_COLOR.Other) : listColor(cur)) : '';
+    return '<div class="item'+(r.checked?' done':'')+'"'+(ic?' style="--cc:'+ic+'"':'')+' data-id="'+esc(r.id)+'"><span class="box"></span><span class="name">'+esc(r.item)+
+      (meta?'<span class="meta">'+meta+'</span>':'')+'</span>'+
+      '<button class="more" data-more="'+esc(r.id)+'" aria-label="Options">&#x22ef;</button></div>';
+  }).join('')+'</div></div>';
+}
+function set(d){ if (d.list !== cur) return; state = d; render(); }
+function load(){ if (cur===MEALS) return call('apiMeals',KEY).then(setMeals).catch(fail); return call('apiGetList',KEY,cur).then(set).catch(fail); }
+function setMeals(m){ if (cur!==MEALS) return; meals = m; if (m.lists) state.lists = m.lists; render(); }
+function renderMeals(){
+  var m = meals; if (!m){ $('sub').textContent='Loading...'; $('list').innerHTML=''; return; }
+  $('sub').textContent = m.ai ? 'Smart planner on ('+m.ai+')' : 'Simple planner';
+  var html = '';
+  [0,1].forEach(function(w){
+    html += '<div class="section" style="--cc:'+LIST_COLOR.Meals+'"><h2><span class="pill">'+(w? E(0x1f4c5)+' Next week':E(0x1f4c6)+' This week')+'</span></h2><div class="card">'+m.days.slice(w*7,w*7+7).map(function(d){
+      var p = d.label.split(' ');
+      var slots = '';
+      if (d.lunch.length) slots += d.lunch.map(function(x){ return slotBtn(d,'Lunch',x.forWho,x.meal); }).join('');
+      else if (['Sat','Sun'].indexOf(p[0])<0) slots += slotBtn(d,'Lunch','Kids','');
+      slots += d.dinner.length ? d.dinner.map(function(x){ return slotBtn(d,'Dinner',x.forWho,x.meal); }).join('') : slotBtn(d,'Dinner','Family','');
+      return '<div class="day'+(d.today?' today':'')+(d.past?' past':'')+'"><div class="dl">'+esc(p[0])+'<small>'+esc(p[1]+' '+p[2])+'</small></div><div class="dm">'+slots+'</div></div>';
+    }).join('')+'</div></div>';
+  });
+  html += '<button class="gbtn" id="groc">'+E(0x1f6d2)+' Groceries for these meals</button>';
+  html += '<div class="row3"><button id="planNext">Plan next week</button><button id="planThis">Re-plan this week</button></div>';
+  var by = {}; m.prefs.forEach(function(x){ (by[x.person]=by[x.person]||[]).push(x); });
+  html += '<div class="section"><h2><span class="pill">'+E(0x1f9d2)+' Likes and no-thank-yous</span></h2>';
+  var names = Object.keys(by);
+  if (!names.length) html += '<div class="hint">Nothing yet. Tap the mic and say "Jaycee doesn\'t like tomatoes".</div>';
+  names.forEach(function(n){ html += '<div class="pp">'+esc(n)+'</div><div>'+by[n].map(function(x){
+    var ic = x.feeling==='No' ? E(0x1f6ab) : x.feeling==='Allergy' ? E(0x26a0) : x.feeling==='Loves' ? E(0x2764) : E(0x1f44d);
+    return '<span class="pref">'+ic+' '+esc(x.food)+'<button data-unpref="'+esc(n)+'|'+esc(x.food)+'" aria-label="Remove">&#x2715;</button></span>'; }).join('')+'</div>'; });
+  html += '</div><div class="hint">'+m.recipes+' recipes. Meals also show on the Family Meals calendar (and Skylight).</div>';
+  var ai = m.aiInfo || {choice:'Gemini',using:m.ai||'',claude:false,gemini:false};
+  html += '<div class="section"><h2><span class="pill">'+E(0x2699)+' Smart helper</span></h2><div class="wk">'+['Gemini','Claude'].map(function(p){
+    return '<button class="chip'+(ai.choice===p?' sel':'')+'" data-ai="'+p+'">'+p+(ai[p.toLowerCase()]?'':' (no key)')+'</button>'; }).join('')+'</div>'+
+    '<div class="hint">'+(ai.using ? 'Using '+ai.using+(ai.using!==ai.choice?' ('+ai.choice+' has no key yet)':'')+'. If it fails, the other one is the backup.' : 'No key added yet, so the simple planner runs.')+'</div></div>';
+  $('list').innerHTML = html;
+  $('groc').onclick = function(){ var dw = new Date().getDay(); openGroceries(dw===0||dw===6 ? 'next' : 'this'); };
+  $('planNext').onclick = function(){ planWeek('next'); };
+  $('list').querySelectorAll('[data-ai]').forEach(function(b){ b.onclick = function(){ if (b.classList.contains('sel')) return;
+    toast('Switching to '+b.dataset.ai+'...'); call('apiSetAI',KEY,b.dataset.ai).then(function(r){ setMeals(r); toast('Smart helper: '+b.dataset.ai); }).catch(fail); }; });
+  $('planThis').onclick = function(){ ask({title:'Re-plan the rest of this week?', text:'Meals you set by hand stay.', ok:'Re-plan'}).then(function(v){ if (v) planWeek('this'); }); };
+}
+function slotBtn(d, slot, forWho, meal){
+  var tag = slot==='Lunch' ? (forWho==='Kids' ? 'Lunch' : 'Lunch '+forWho) : 'Dinner';
+  return '<button class="slot'+(meal?'':' empty')+'" data-date="'+d.date+'" data-slot="'+slot+'" data-for="'+esc(forWho)+'" data-meal="'+esc(meal)+'" data-label="'+esc(d.label)+'"><b>'+esc(tag)+'</b>'+(meal?esc(meal):'+ add')+'</button>';
+}
+/* Groceries sheet (GL1.3, GL1.4 adds talk-to-check): green = we have it, red = need it, amber = already on Shopping. Tap to flip. */
+var groc = null;
+function openGroceries(which){
+  $('sheet').innerHTML = '<h3>Groceries</h3><div class="sub">Checking what we have...</div>';
+  $('sheet').classList.add('open'); $('sbg').classList.add('open');
+  call('apiGroceries',KEY,which).then(function(g){ groc = g; renderGroceries(); }).catch(fail);
+}
+function renderGroceries(){
+  var g = groc, need = g.items.filter(function(x){return x.state==='need';});
+  var old = $('gct'), keep = old ? old.value : '', hadFocus = old && document.activeElement===old, top = $('sheet').scrollTop;
+  var h = '<h3>Groceries</h3><div class="sub">'+esc(g.label)+'</div>'+
+    '<div class="wk"><button class="chip'+(g.which==='this'?' sel':'')+'" data-wk="this">Rest of this week</button><button class="chip'+(g.which==='next'?' sel':'')+'" data-wk="next">Next week</button></div>'+
+    '<div class="legend"><span><i style="background:var(--red)"></i>Need</span><span><i style="background:var(--green)"></i>Have</span><span><i style="background:var(--amber)"></i>On Shopping</span><span>Tap to switch</span></div>'+
+    '<div class="gcheck"><form id="gcf" autocomplete="off"><button type="button" class="round mic'+(gListen?' on':'')+'" id="gmic" aria-label="Talk to check">'+$('mic').innerHTML+'</button>'+
+    '<input id="gct" placeholder="Say what we have..." enterkeyhint="send"><button class="round add" aria-label="Send" style="font-size:20px">'+E(0x2713)+'</button></form>'+
+    '<div class="hint2">'+(gListen ? 'Listening. Say things like "two carrots, half a yogurt, no ham". Tap the mic to stop.' : 'Tap the mic and walk the fridge: "two carrots, half a yogurt, no ham".')+'</div></div>';
+  if (!g.items.length) h += '<div class="hint">No ingredients for these meals yet. Plan the week first, or add recipes.</div>';
+  h += '<div>'+g.items.map(function(x,i){
+    return '<button class="gi '+x.state+'" data-gi="'+i+'"><span class="dot"></span><span class="gn">'+esc(x.name)+'<span class="gw">'+esc(x.why)+' '+E(0xb7)+' '+esc(x.meals.join(', '))+'</span></span><span class="st">'+(x.amount?'<span class="amt">'+esc(x.amount)+'</span> ':'')+(x.state==='need'?'Need':x.state==='have'?'Have':'Listed')+'</span></button>'; }).join('')+'</div>';
+  h += '<button class="gbtn" id="gadd"'+(need.length?'':' disabled style="opacity:.5"')+'>'+(need.length ? 'Add '+need.length+' to Shopping' : 'Nothing needed')+'</button>';
+  $('sheet').innerHTML = h; $('sheet').scrollTop = top;
+  if (keep) $('gct').value = keep; if (hadFocus) $('gct').focus();
+  $('sheet').querySelectorAll('[data-wk]').forEach(function(b){ b.onclick = function(){ openGroceries(b.dataset.wk); }; });
+  $('sheet').querySelectorAll('[data-gi]').forEach(function(b){ b.onclick = function(){
+    var x = groc.items[+b.dataset.gi]; if (x.state==='list') { toast('Already on Shopping.'); return; }
+    x.state = x.state==='need' ? 'have' : 'need'; x.why = x.state==='have' ? 'you said we have it' : 'you said we need it';
+    renderGroceries(); call('apiPantrySet',KEY,x.name,x.state==='have'?'Have':'Out',who||'').catch(fail); }; });
+  $('gcf').onsubmit = function(e){ e.preventDefault(); var v = $('gct').value; $('gct').value = ''; checkSay(v); };
+  $('gmic').onclick = function(){ gListen ? stopCheck() : startCheck(); };
+  $('gadd').onclick = function(){ if (!need.length) return; stopCheck(); var names = need.map(function(x){return x.name;});
+    closeSheet(); toast('Adding...'); call('apiGroceriesAdd',KEY,names,who||'').then(function(r){ toast(r.msg); }).catch(fail); };
+}
+/* GL1.4 talk-while-you-look pantry check. Each phrase goes to the server in order; the list updates as you talk. */
+var gListen = false, gRec = null, gQueue = Promise.resolve();
+function checkSay(text){
+  text = (text||'').trim(); if (!text || !groc) return;
+  var which = groc.which;
+  gQueue = gQueue.then(function(){ return call('apiPantryTalk',KEY,text,which,who||''); })
+    .then(function(r){ if (groc && groc.which===which && $('sheet').classList.contains('open')){ groc = r.groceries; renderGroceries(); } toast(r.msg); })
+    .catch(fail);
+}
+function startCheck(){
+  if (!SR){ $('gct').focus(); toast('Tap the mic on your keyboard, then tap the tick after each bit.'); return; }
+  gListen = true; renderGroceries(); listenCheck();
+}
+function listenCheck(){
+  try {
+    gRec = new SR(); gRec.lang = 'en-CA'; gRec.interimResults = true; gRec.continuous = true;
+    gRec.onresult = function(ev){ var live = '';
+      for (var i = ev.resultIndex; i < ev.results.length; i++){
+        if (ev.results[i].isFinal) checkSay(ev.results[i][0].transcript); else live += ev.results[i][0].transcript; }
+      var t = $('gct'); if (t) t.value = live; };
+    gRec.onerror = function(ev){ if (ev.error==='not-allowed'||ev.error==='service-not-allowed'){ gListen = false; renderGroceries(); $('gct').focus(); toast('Mic blocked here. Use the keyboard mic, then tap the tick.'); } };
+    gRec.onend = function(){ gRec = null; if (gListen) setTimeout(function(){ if (gListen) listenCheck(); }, 250); };
+    gRec.start();
+  } catch(err){ gListen = false; gRec = null; renderGroceries(); toast('Tap the mic on your keyboard to talk.'); }
+}
+function stopCheck(){ var was = gListen; gListen = false; if (gRec){ try{ gRec.stop(); }catch(e){} gRec = null; } if (was && groc && $('gmic')) renderGroceries(); }
+function planWeek(which){ toast('Planning... this can take a minute'); call('apiMealPlanWeek',KEY,which,who||'').then(function(r){ toast(r.msg); setMeals(r.meals); }).catch(fail); }
+function go(name){ meals = null; cur = name; try{localStorage.setItem('gl_list',cur);}catch(e){} state.rows=[]; state.usuals=[]; state.sorted=true; state.list=cur; render(); load(); }
+$('tabs').addEventListener('click', function(e){
+  var b = e.target.closest('[data-list]'); if (b){ go(b.dataset.list); return; }
+  if (e.target.closest('#newlist')){
+    var name;
+    ask({title:'New list', text:'For example Kids sizes, Trip packing, Hardware.', input:true, placeholder:'List name', ok:'Next'}).then(function(v){
+      name = (v||'').trim(); if (!name) return null;
+      return ask({title:'What kind of list is "'+name+'"?', buttons:[{label:E(0x1f6d2)+' Shopping list (sorted by aisle)', value:'shop', kind:'main'},{label:E(0x1f4dd)+' Info list (in the order you add)', value:'info'}]});
+    }).then(function(kind){ if (!kind) return;
+      cur = name; call('apiAddList',KEY,cur,kind==='shop').then(function(d){ cur = d.list; try{localStorage.setItem('gl_list',cur);}catch(x){} state=d; render(); toast('Made '+cur+'.'); }).catch(fail); });
   }
-  // keep the key in the address so an iPhone home-screen copy has it too
-  if (!m && history.replaceState) history.replaceState(null, '', '#k=' + key);
-  var f = document.createElement('iframe');
-  f.src = window.GL_EXEC + '?k=' + encodeURIComponent(key);
-  f.allow = 'microphone; clipboard-write';
-  f.title = 'Our Lists';
-  f.onload = function () { msg.style.display = 'none'; };
-  document.body.appendChild(f);
-})();
+});
+
+$('list').addEventListener('click', function(e){
+  var u = e.target.closest('[data-unpref]');
+  if (u){ var pf = u.getAttribute('data-unpref').split('|');
+    ask({title:'Remove "'+pf[1]+'" for '+pf[0]+'?', ok:'Remove', danger:true}).then(function(v){ if (v) call('apiPrefRemove',KEY,pf[0],pf[1]).then(setMeals).catch(fail); }); return; }
+  var sl = e.target.closest('.slot');
+  if (sl){ var d = sl.dataset, forTxt = d.for!=='Kids'&&d.for!=='Family' ? ' for '+d.for : '';
+    var btns = [{label:'Save', value:true, kind:'main'}]; if (d.meal) btns.push({label:'Clear this '+d.slot.toLowerCase(), value:'__clear', kind:'danger'});
+    ask({title:d.slot+' on '+d.label+forTxt, input:true, value:d.meal, placeholder:d.slot==='Lunch'?'e.g. Turkey pinwheels':'e.g. Taco night', buttons:btns}).then(function(v){
+      if (v===null || v===undefined) return; if (v==='__clear') v = '';
+      if (v===d.meal) return;
+      call('apiMealSet',KEY,d.date,d.slot,d.for,v,who||'').then(setMeals).catch(fail); }); return; }
+  var m = e.target.closest('[data-more]'); if (m){ openSheet(m.getAttribute('data-more')); return; }
+  var it = e.target.closest('.item'); if (!it) return;
+  var r = state.rows.filter(function(x){return x.id===it.dataset.id;})[0]; if (!r) return;
+  r.checked = !r.checked; render(); if (navigator.vibrate) navigator.vibrate(10);
+  var again = document.querySelector('.item[data-id="'+r.id+'"]'); if (again) again.classList.add('pop');
+  call('apiToggle',KEY,r.id,r.checked,cur).then(set).catch(fail);
+});
+
+function add(text){
+  text = (text||'').trim(); if (!text) return;
+  $('t').value = '';
+  if (cur===MEALS){ toast('Thinking...'); call('apiMealTalk',KEY,text,who||'').then(function(r){ toast(r.msg); setMeals(r.meals); }).catch(fail); return; }
+  toast('Adding...');
+  call('apiAdd',KEY,text,who||'',cur).then(function(d){ toast(d.msg); set(d.list); }).catch(fail);
+}
+$('f').addEventListener('submit', function(e){ e.preventDefault(); add($('t').value); });
+
+/* Mic: phone speech recognition where the browser allows it; otherwise the keyboard's own mic. */
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition, rec = null;
+$('mic').onclick = function(){
+  if (rec){ rec.stop(); return; }
+  if (!SR){ $('t').focus(); toast('Tap the mic on your keyboard to talk.'); return; }
+  try {
+    rec = new SR(); rec.lang = 'en-CA'; rec.interimResults = true; rec.continuous = false;
+    var finalText = '';
+    rec.onresult = function(ev){ var s=''; for (var i=0;i<ev.results.length;i++){ s += ev.results[i][0].transcript; } $('t').value = s; finalText = s; };
+    rec.onerror = function(ev){ if (ev.error==='not-allowed'||ev.error==='service-not-allowed'){ $('t').focus(); toast('Mic blocked here. Tap the mic on your keyboard instead.'); } };
+    rec.onend = function(){ $('mic').classList.remove('on'); rec = null; if (finalText) add(finalText); };
+    rec.start(); $('mic').classList.add('on'); toast('Listening... say "milk, eggs and bananas"');
+  } catch(err){ rec = null; $('t').focus(); toast('Tap the mic on your keyboard to talk.'); }
+};
+
+/* Options sheet: move aisle (teaches), rename, remove (with Undo) */
+function openSheet(id){
+  var r = state.rows.filter(function(x){return x.id===id;})[0]; if (!r) return;
+  var cats = state.order.length ? state.order : Object.keys(EMOJI);
+  $('sheet').innerHTML = '<h3>'+esc(r.item)+'</h3>'+(state.sorted ? '<div class="sub">Pick the right aisle. It will remember next time.</div><div class="chips">'+
+    cats.map(function(c){return '<button class="chip'+(c===r.category?' sel':'')+'" style="--cc:'+(CAT_COLOR[c]||CAT_COLOR.Other)+'" data-cat="'+esc(c)+'">'+(EMOJI[c]||E(0x1f6d2))+' '+esc(c)+'</button>';}).join('')+
+    '</div>' : '<div style="height:14px"></div>')+'<div class="row2"><button id="ren">Rename</button><button class="danger" id="del">Remove</button></div>';
+  $('sheet').classList.add('open'); $('sbg').classList.add('open');
+  $('sheet').querySelectorAll('[data-cat]').forEach(function(b){ b.onclick = function(){
+    r.category = b.dataset.cat; closeSheet(); render(); toast('Moved to '+r.category+'. Learned.');
+    call('apiSetCategory',KEY,id,r.category,cur).then(set).catch(fail); }; });
+  $('ren').onclick = function(){ closeSheet(); ask({title:'Rename', input:true, value:r.item, ok:'Save'}).then(function(v){ if (v && v.trim() && v.trim()!==r.item) call('apiRename',KEY,id,v.trim(),cur).then(set).catch(fail); }); };
+  $('del').onclick = function(){ var list = cur, text = r.item;
+    state.rows = state.rows.filter(function(x){return x.id!==id;}); closeSheet(); render();
+    call('apiDelete',KEY,id,list).then(set).catch(fail);
+    toast('Removed '+text+'.', 'Undo', function(){ call('apiAdd',KEY,text,who||'',list).then(function(d){ toast('Put back.'); set(d.list); }).catch(fail); }); };
+}
+function closeSheet(){ stopCheck(); $('sheet').classList.remove('open'); $('sbg').classList.remove('open'); }
+$('sbg').onclick = closeSheet;
+
+/* First open: ask who this phone belongs to (used for "Added by"). */
+function askWho(){
+  $('sheet').innerHTML = '<h3>Whose phone is this?</h3><div class="sub">So the list shows who added what.</div>'+
+    '<div class="who"><button data-w="Lucas" style="background:'+WHO_COLOR.Lucas+'">Lucas</button><button data-w="Brittany" style="background:'+WHO_COLOR.Brittany+'">Brittany</button></div>';
+  $('sheet').classList.add('open'); $('sbg').classList.add('open');
+  $('sheet').querySelectorAll('[data-w]').forEach(function(b){ b.onclick=function(){ who=b.dataset.w; try{localStorage.setItem('gl_who',who);}catch(e){} closeSheet(); toast('Hi '+who+'! '+E(0x1f44b)); }; });
+}
+
+applyTheme(); load(); if (!who) askWho();
+setInterval(function(){ if (!document.hidden && !rec && !gListen && !$('dlgbg').classList.contains('open')) load(); }, 20000);
+document.addEventListener('visibilitychange', function(){ if (!document.hidden) load(); });
 </script>
 </body>
 </html>
