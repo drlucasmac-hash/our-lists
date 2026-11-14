@@ -15,7 +15,7 @@
 <meta name="apple-mobile-web-app-title" content="Our Lists">
 <meta name="theme-color" content="#fbf8f3">
 <script src="config.js"></script>
-<!-- Family Lists (GL1) web app page. Engine Room / Continue family grocery list app. GL1.6 look: Mon Nov 9 2026 12:40 AM PT; GL1.7 Tue Nov 10 9:30 AM PT: cart ticks keep aisle colour, toast always dark; GL1.9 Fri Nov 13 11:15 PM PT: Paste a key button (Smart helper); GL1.10 Sat Nov 14 PT: House rules; GL1.11 Sat Nov 14 2026 PT: four looks (Market, Ledger, Notebook, Midnight) + Original, Aa button; GL1.12 Sat Nov 14 2026 PT: colour + style choices per look, Notebook default
+<!-- Family Lists (GL1) web app page. Engine Room / Continue family grocery list app. GL1.6 look: Mon Nov 9 2026 12:40 AM PT; GL1.7 Tue Nov 10 9:30 AM PT: cart ticks keep aisle colour, toast always dark; GL1.9 Fri Nov 13 11:15 PM PT: Paste a key button (Smart helper); GL1.10 Sat Nov 14 PT: House rules; GL1.11 Sat Nov 14 2026 PT: four looks (Market, Ledger, Notebook, Midnight) + Original, Aa button; GL1.12 Sat Nov 14 2026 PT: colour + style choices per look, Notebook default; GL1.13 Sat Nov 14 2026 PT: gift photos (camera, AI names it, grouped by person)
      (Lucas: simple, colourful, practical for Brittany). Each list has its own colour, each aisle its own colour,
      in-app dialogs (no browser pop-ups), Usuals quick-add, Undo on remove, cart progress bar. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -407,6 +407,19 @@ html[data-look="ledger"][data-style="graph"] body{background-image:linear-gradie
 /* Midnight styles */
 html[data-look="midnight"][data-style="navy"]{--bg:#0b1020;--card:#111831;--line:#222c47;--line2:#2f3b5c}
 html[data-look="midnight"][data-style="charcoal"]{--bg:#111111;--card:#191919;--line:#2a2a2a;--line2:#3a3a3a}
+
+/* GL1.13 gift photos */
+.cam{background:var(--accent-soft);color:var(--accent);display:none}
+.cam.on{display:grid}
+.thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;flex:none;background:var(--line);cursor:zoom-in}
+.det{display:block;font-size:12.5px;color:var(--muted);font-weight:500;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phprev{display:block;width:100%;max-height:44vh;object-fit:contain;border-radius:14px;background:var(--bg);margin:10px 0 12px}
+.phrow{display:flex;gap:8px;align-items:center}
+.phrow input{flex:1;min-width:0;font:inherit;font-weight:600;font-size:17px;padding:12px 14px;border-radius:14px;border:2px solid var(--accent-soft);background:var(--bg);color:var(--ink);outline:none}
+.phbig{display:block;width:100%;max-height:70vh;object-fit:contain;border-radius:12px;background:#000;margin-top:10px}
+html[data-look="notebook"] .thumb{border-radius:2px;border:4px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.18);transform:rotate(-2deg)}
+html[data-look="ledger"] .thumb{border-radius:0;border:2px solid #0b0b0b}
+html[data-look="midnight"] .thumb{border-radius:2px;border:1px solid var(--line2)}
 </style>
 </head>
 <body>
@@ -421,6 +434,10 @@ html[data-look="midnight"][data-style="charcoal"]{--bg:#111111;--card:#191919;--
   <button type="button" class="round mic" id="mic" aria-label="Speak items">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
   </button>
+  <button type="button" class="round cam" id="cam" aria-label="Take a photo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+  </button>
+  <input type="file" id="camf" accept="image/*" capture="environment" style="display:none">
   <input id="t" placeholder="Add milk, eggs, bananas&#x2026;" enterkeyhint="done">
   <button class="round add" aria-label="Add">+</button>
 </form></div>
@@ -657,6 +674,7 @@ function renderTabs(){
   $('title').textContent = cur;
   applyTheme();
   $('t').placeholder = cur===MEALS ? LK().phMeals : state.sorted ? LK().ph : LK().phNote;
+  $('cam').classList.toggle('on', cur!==MEALS && !state.sorted);
 }
 function render(){
   renderTabs();
@@ -671,10 +689,15 @@ function render(){
     var groups = {}; open.forEach(function(r){ (groups[r.category]=groups[r.category]||[]).push(r); });
     var cats = state.order.filter(function(c){return groups[c];}).concat(Object.keys(groups).filter(function(c){return state.order.indexOf(c)<0;}));
     html += cats.map(function(c){ return section(c, groups[c], tone(CAT_COLOR[c]||CAT_COLOR.Other), EMOJI[c]||E(0x1f6d2)); }).join('');
+  } else if (open.some(function(r){ return r.category && r.category!=='Other'; })) {
+    /* GL1.13: gift lists are grouped by who it is for (Category = person) */
+    var by = {}; open.forEach(function(r){ var w = r.category && r.category!=='Other' ? r.category : 'Anyone'; (by[w]=by[w]||[]).push(r); });
+    var ppl = Object.keys(by).filter(function(w){ return w!=='Anyone'; }).sort(); if (by.Anyone) ppl.push('Anyone');
+    html += ppl.map(function(w){ return section(w==='Anyone' ? 'Anyone / not sure' : 'For '+w, by[w], tone(listColor(cur)), E(0x1f381)); }).join('');
   } else { html += open.length ? section('', open, tone(listColor(cur)), '') : ''; }
   if (done.length){ html += section(state.sorted ? LK().cart : 'Done', done, '#9aa3ab', E(0x2705)) + '<button class="clear" id="clr">'+esc(LK().clear(done.length))+'</button>'; }
   $('list').innerHTML = html;
-  wireUsuals();
+  wireUsuals(); loadThumbs();
   if ($('clr')) $('clr').onclick = function(){ state.rows = state.rows.filter(function(r){return !r.checked;}); render(); call('apiClearChecked',KEY,cur).then(set).catch(fail); };
 }
 function usualsHtml(){
@@ -691,7 +714,7 @@ function section(title, items, color, emoji){
   return '<div class="section" style="--cc:'+color+'">'+(title?'<h2><span class="pill">'+(emoji?em(emoji):'')+esc(title)+'</span><span class="n">'+items.length+'</span></h2>':'')+'<div class="card">'+items.map(function(r){
     var meta = [whoDot(r.by), esc([r.by, r.source==='Web app'?'':r.source].filter(Boolean).join(' '+E(0xb7)+' '))].join('');
     var ic = r.checked ? tone(state.sorted ? (CAT_COLOR[r.category]||CAT_COLOR.Other) : listColor(cur)) : '';
-    return '<div class="item'+(r.checked?' done':'')+'"'+(ic?' style="--cc:'+ic+'"':'')+' data-id="'+esc(r.id)+'"><span class="box"></span><span class="name">'+esc(r.item)+
+    return '<div class="item'+(r.checked?' done':'')+'"'+(ic?' style="--cc:'+ic+'"':'')+' data-id="'+esc(r.id)+'"><span class="box"></span>'+(r.ph?'<img class="thumb" data-ph="'+esc(r.id)+'" alt="">':'')+'<span class="name">'+esc(r.item)+(r.ph&&r.note?'<span class="det">'+esc(String(r.note).split(' | ')[0].replace(/^Note: /,''))+'</span>':'')+
       (meta?'<span class="meta">'+meta+'</span>':'')+'</span>'+
       '<button class="more" data-more="'+esc(r.id)+'" aria-label="Options">&#x22ef;</button></div>';
   }).join('')+'</div></div>';
@@ -871,8 +894,11 @@ function openSheet(id){
   var cats = state.order.length ? state.order : Object.keys(EMOJI);
   $('sheet').innerHTML = '<h3>'+esc(r.item)+'</h3>'+(state.sorted ? '<div class="sub">Pick the right aisle. It will remember next time.</div><div class="chips">'+
     cats.map(function(c){return '<button class="chip'+(c===r.category?' sel':'')+'" style="--cc:'+(CAT_COLOR[c]||CAT_COLOR.Other)+'" data-cat="'+esc(c)+'">'+(EMOJI[c]||E(0x1f6d2))+' '+esc(c)+'</button>';}).join('')+
-    '</div>' : '<div style="height:14px"></div>')+'<div class="row2"><button id="ren">Rename</button><button class="danger" id="del">Remove</button></div>';
+    '</div>' : forChips(r))+'<div class="row2"><button id="ren">Rename</button><button class="danger" id="del">Remove</button></div>';
   $('sheet').classList.add('open'); $('sbg').classList.add('open');
+  $('sheet').querySelectorAll('[data-for]').forEach(function(b){ b.onclick = function(){
+    r.category = b.dataset.for; closeSheet(); render(); toast(r.category ? 'Moved to '+r.category+'.' : 'Moved to Anyone.');
+    call('apiSetFor',KEY,id,r.category,cur).then(set).catch(fail); }; });
   $('sheet').querySelectorAll('[data-cat]').forEach(function(b){ b.onclick = function(){
     r.category = b.dataset.cat; closeSheet(); render(); toast('Moved to '+r.category+'. Learned.');
     call('apiSetCategory',KEY,id,r.category,cur).then(set).catch(fail); }; });
@@ -884,6 +910,66 @@ function openSheet(id){
 }
 function closeSheet(){ stopCheck(); $('sheet').classList.remove('open'); $('sbg').classList.remove('open'); }
 $('sbg').onclick = closeSheet;
+
+/* GL1.13 gift photos: camera button on lists that are not sorted by aisle (Gift Ideas, Notes, new lists). */
+function forChips(r){
+  var ppl = (state.people||[]).slice(); state.rows.forEach(function(x){ if (x.category && x.category!=='Other' && ppl.indexOf(x.category)<0) ppl.push(x.category); });
+  if (!ppl.length) return '<div style="height:14px"></div>';
+  var c = r.category==='Other' ? '' : r.category;
+  return '<div class="sub">Who is it for?</div><div class="chips">'+ppl.map(function(n){ return '<button class="chip'+(n===c?' sel':'')+'" data-for="'+esc(n)+'">'+esc(n)+'</button>'; }).join('')+
+    '<button class="chip'+(!c?' sel':'')+'" data-for="">Anyone</button></div>';
+}
+function thumbGet(id){ try { return localStorage.getItem('gl_th_'+id); } catch(e) { return null; } }
+function loadThumbs(){
+  var need = [];
+  $('list').querySelectorAll('[data-ph]').forEach(function(im){ var t = thumbGet(im.dataset.ph); if (t) im.src = 'data:image/jpeg;base64,'+t; else need.push(im.dataset.ph); });
+  if (!need.length || loadThumbs.busy) return; loadThumbs.busy = true;
+  call('apiPhotoThumbs',KEY,need).then(function(m){ loadThumbs.busy = false;
+    Object.keys(m||{}).forEach(function(id){ try { localStorage.setItem('gl_th_'+id, m[id]); } catch(e) {}
+      var im = document.querySelector('[data-ph="'+id+'"]'); if (im) im.src = 'data:image/jpeg;base64,'+m[id]; }); }).catch(function(){ loadThumbs.busy = false; });
+}
+function shrink(file, max, q){ return new Promise(function(ok, no){
+  var url = URL.createObjectURL(file), im = new Image();
+  im.onload = function(){ var s = Math.min(1, max/Math.max(im.width, im.height)), c = document.createElement('canvas');
+    c.width = Math.round(im.width*s); c.height = Math.round(im.height*s); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', q).split(',')[1]); };
+  im.onerror = function(){ URL.revokeObjectURL(url); no(new Error('Could not read that photo.')); };
+  im.src = url; }); }
+$('cam').onclick = function(){ $('camf').value = ''; $('camf').click(); };
+$('camf').onchange = function(){
+  var f = $('camf').files && $('camf').files[0]; if (!f) return;
+  toast('Getting the photo ready...');
+  Promise.all([shrink(f, 1280, 0.8), shrink(f, 240, 0.7)]).then(function(p){ photoNote(p[0], p[1]); }).catch(function(e){ toast(e.message); });
+};
+function photoNote(full, thumb){
+  var list = cur;
+  $('sheet').innerHTML = '<h3>New photo idea</h3><img class="phprev" src="data:image/jpeg;base64,'+thumb+'" alt="">'+
+    '<div class="phrow"><input id="phn" placeholder="What is it? Who is it for?" enterkeyhint="done">'+
+    '<button type="button" class="round mic" id="phmic" aria-label="Say it">'+$('mic').innerHTML+'</button></div>'+
+    '<div class="hint">Like "for Lexi, saw it at Indigo". You can leave it blank: the photo is enough.</div>'+
+    '<button class="gbtn" id="phsave">Save to '+esc(list)+'</button>';
+  $('sheet').classList.add('open'); $('sbg').classList.add('open');
+  var big = $('sheet').querySelector('.phprev'); shrinkSrc(big, full);
+  function save(){ var note = ($('phn').value||'').trim(); closeSheet(); toast('Saving and reading the photo...');
+    call('apiAddPhoto',KEY,list,who||'',note,full,thumb).then(function(d){ toast(d.msg); if (d.list && d.list.list===cur) set(d.list); }).catch(function(e){ toast(navigator.onLine===false ? 'Photos need signal. Try again when you have it.' : 'Could not save the photo. Try again.'); console.log(e); }); }
+  $('phsave').onclick = save;
+  $('phn').onkeydown = function(e){ if (e.key==='Enter'){ e.preventDefault(); save(); } };
+  $('phmic').onclick = function(){
+    if (!SR){ $('phn').focus(); toast('Tap the mic on your keyboard to talk.'); return; }
+    try { var r2 = new SR(); r2.lang = 'en-CA'; r2.interimResults = true;
+      r2.onresult = function(ev){ var t = ''; for (var i=0;i<ev.results.length;i++) t += ev.results[i][0].transcript; $('phn').value = t; };
+      r2.onend = function(){ $('phmic').classList.remove('on'); };
+      r2.start(); $('phmic').classList.add('on'); } catch(err){ $('phn').focus(); }
+  };
+}
+function shrinkSrc(img, b64){ if (img) img.src = 'data:image/jpeg;base64,'+b64; }
+$('list').addEventListener('click', function(e){
+  var t = e.target.closest('[data-ph]'); if (!t) return; e.stopPropagation(); e.preventDefault();
+  var r = state.rows.filter(function(x){ return x.id===t.dataset.ph; })[0] || {item:''};
+  $('sheet').innerHTML = '<h3>'+esc(r.item)+'</h3>'+(r.note?'<div class="sub">'+esc(r.note)+'</div>':'')+'<img class="phbig" id="phbig" src="'+t.src+'" alt="">';
+  $('sheet').classList.add('open'); $('sbg').classList.add('open');
+  call('apiPhoto',KEY,t.dataset.ph).then(function(d){ var b = $('phbig'); if (b && d && d.data) b.src = 'data:image/jpeg;base64,'+d.data; }).catch(function(){});
+}, true);
 $('lookbtn').onclick = openLooks;
 applyLook();
 
