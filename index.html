@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="Our Lists">
 <meta name="theme-color" content="#fbf8f3">
 <script src="config.js"></script>
-<!-- Family Lists (GL1) web app page. Engine Room / Continue family grocery list app. GL1.6 look: Mon Nov 9 2026 12:40 AM PT; GL1.7 Tue Nov 10 9:30 AM PT: cart ticks keep aisle colour, toast always dark; GL1.9 Fri Nov 13 11:15 PM PT: Paste a key button (Smart helper)
+<!-- Family Lists (GL1) web app page. Engine Room / Continue family grocery list app. GL1.6 look: Mon Nov 9 2026 12:40 AM PT; GL1.7 Tue Nov 10 9:30 AM PT: cart ticks keep aisle colour, toast always dark; GL1.9 Fri Nov 13 11:15 PM PT: Paste a key button (Smart helper); GL1.10 Sat Nov 14 PT: House rules
      (Lucas: simple, colourful, practical for Brittany). Each list has its own colour, each aisle its own colour,
      in-app dialogs (no browser pop-ups), Usuals quick-add, Undo on remove, cart progress bar. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -322,7 +322,12 @@ function renderMeals(){
   names.forEach(function(n){ html += '<div class="pp">'+esc(n)+'</div><div>'+by[n].map(function(x){
     var ic = x.feeling==='No' ? E(0x1f6ab) : x.feeling==='Allergy' ? E(0x26a0) : x.feeling==='Loves' ? E(0x2764) : E(0x1f44d);
     return '<span class="pref">'+ic+' '+esc(x.food)+'<button data-unpref="'+esc(n)+'|'+esc(x.food)+'" aria-label="Remove">&#x2715;</button></span>'; }).join('')+'</div>'; });
-  html += '</div><div class="hint">'+m.recipes+' recipes. Meals also show on the Family Meals calendar (and Skylight).</div>';
+  html += '</div>';
+  /* GL1.10 house rules */
+  html += '<div class="section"><h2><span class="pill">'+E(0x1f4cf)+' House rules</span></h2><div>'+((m.rules||[]).map(function(r){
+    return '<span class="pref">'+esc(r)+'<button data-unrule="'+esc(r)+'" aria-label="Remove">&#x2715;</button></span>'; }).join('') ||
+    '<div class="hint">None yet. Tap the mic and say "No fajitas on Thursdays" or "Friday is pizza night".</div>')+'</div></div>';
+  html += '<div class="hint">'+m.recipes+' recipes. Meals also show on the Family Meals calendar (and Skylight).</div>';
   var ai = m.aiInfo || {choice:'Gemini',using:m.ai||'',claude:false,gemini:false};
   html += '<div class="section"><h2><span class="pill">'+E(0x2699)+' Smart helper</span></h2><div class="wk">'+['Gemini','Claude'].map(function(p){
     return '<button class="chip'+(ai.choice===p?' sel':'')+'" data-ai="'+p+'">'+p+(ai[p.toLowerCase()]?'':' (no key)')+'</button>'; }).join('')+'</div>'+
@@ -418,6 +423,9 @@ $('list').addEventListener('click', function(e){
   var u = e.target.closest('[data-unpref]');
   if (u){ var pf = u.getAttribute('data-unpref').split('|');
     ask({title:'Remove "'+pf[1]+'" for '+pf[0]+'?', ok:'Remove', danger:true}).then(function(v){ if (v) call('apiPrefRemove',KEY,pf[0],pf[1]).then(setMeals).catch(fail); }); return; }
+  var ur = e.target.closest('[data-unrule]');
+  if (ur){ var rt = ur.getAttribute('data-unrule');
+    ask({title:'Remove the rule "'+rt+'"?', ok:'Remove', danger:true}).then(function(v){ if (v) call('apiRuleRemove',KEY,rt).then(setMeals).catch(fail); }); return; }
   var sl = e.target.closest('.slot');
   if (sl){ var d = sl.dataset, forTxt = d.for!=='Kids'&&d.for!=='Family' ? ' for '+d.for : '';
     var btns = [{label:'Save', value:true, kind:'main'}]; if (d.meal) btns.push({label:'Clear this '+d.slot.toLowerCase(), value:'__clear', kind:'danger'});
