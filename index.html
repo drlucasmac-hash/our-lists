@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="Our Lists">
 <meta name="theme-color" content="#fbf8f3">
 <script src="config.js"></script>
-<!-- Family Lists (GL1) web app page. Engine Room / Continue family grocery list app. GL1.6 look: Mon Nov 9 2026 12:40 AM PT; GL1.7 Tue Nov 10 9:30 AM PT: cart ticks keep aisle colour, toast always dark
+<!-- Family Lists (GL1) web app page. Engine Room / Continue family grocery list app. GL1.6 look: Mon Nov 9 2026 12:40 AM PT; GL1.7 Tue Nov 10 9:30 AM PT: cart ticks keep aisle colour, toast always dark; GL1.9 Fri Nov 13 11:15 PM PT: Paste a key button (Smart helper)
      (Lucas: simple, colourful, practical for Brittany). Each list has its own colour, each aisle its own colour,
      in-app dialogs (no browser pop-ups), Usuals quick-add, Undo on remove, cart progress bar. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -316,12 +316,16 @@ function renderMeals(){
   var ai = m.aiInfo || {choice:'Gemini',using:m.ai||'',claude:false,gemini:false};
   html += '<div class="section"><h2><span class="pill">'+E(0x2699)+' Smart helper</span></h2><div class="wk">'+['Gemini','Claude'].map(function(p){
     return '<button class="chip'+(ai.choice===p?' sel':'')+'" data-ai="'+p+'">'+p+(ai[p.toLowerCase()]?'':' (no key)')+'</button>'; }).join('')+'</div>'+
-    '<div class="hint">'+(ai.using ? 'Using '+ai.using+(ai.using!==ai.choice?' ('+ai.choice+' has no key yet)':'')+'. If it fails, the other one is the backup.' : 'No key added yet, so the simple planner runs.')+'</div></div>';
+    '<div class="hint">'+(ai.using ? 'Using '+ai.using+(ai.using!==ai.choice?' ('+ai.choice+' has no key yet)':'')+'. If it fails, the other one is the backup.' : 'No key added yet, so the simple planner runs.')+'</div>'+
+    '<div class="wk"><button class="chip" id="addKey">'+E(0x1f511)+' Paste a key</button></div></div>';
   $('list').innerHTML = html;
   $('groc').onclick = function(){ var dw = new Date().getDay(); openGroceries(dw===0||dw===6 ? 'next' : 'this'); };
   $('planNext').onclick = function(){ planWeek('next'); };
   $('list').querySelectorAll('[data-ai]').forEach(function(b){ b.onclick = function(){ if (b.classList.contains('sel')) return;
     toast('Switching to '+b.dataset.ai+'...'); call('apiSetAI',KEY,b.dataset.ai).then(function(r){ setMeals(r); toast('Smart helper: '+b.dataset.ai); }).catch(fail); }; });
+  $('addKey').onclick = function(){ ask({title:'Paste a key', text:'Gemini keys start with AIza or AQ. Claude keys start with sk-ant-api. It is tested first, then saved. Nobody else sees it.', input:true, placeholder:'Paste here', ok:'Test and save'})
+    .then(function(v){ v = (v||'').replace(/\s+/g,''); if (!v) return; toast('Testing the key...');
+      call('apiSetKey',KEY,/^sk-ant/.test(v)?'Claude':'Gemini',v).then(function(r){ setMeals(r.meals); toast(r.msg); }).catch(fail); }); };
   $('planThis').onclick = function(){ ask({title:'Re-plan the rest of this week?', text:'Meals you set by hand stay.', ok:'Re-plan'}).then(function(v){ if (v) planWeek('this'); }); };
 }
 function slotBtn(d, slot, forWho, meal){
