@@ -168,7 +168,17 @@ main{padding:6px 16px 150px;max-width:640px;margin:0 auto}
 <div class="dlg-bg" id="dlgbg"><div class="dlg" id="dlg"></div></div>
 
 <script>
-if (!/k=/.test(location.hash)) { try { if (!localStorage.getItem('gl_key')) document.addEventListener('DOMContentLoaded', function(){ document.body.innerHTML = '<p style="font-family:sans-serif;padding:60px 24px;text-align:center;line-height:1.5"><b>Open the full link Lucas sent you</b> once, then add it to your home screen.</p>'; }); } catch(e) {} }
+(function(){ var has = /k=[A-Za-z0-9]+/.test(location.hash); try { has = has || !!localStorage.getItem('gl_key'); } catch(e) {}
+  if (has) return; window.GL_NOKEY = true; document.addEventListener('DOMContentLoaded', function(){
+    document.body.innerHTML = '<div style="font-family:Nunito,system-ui,sans-serif;max-width:420px;margin:0 auto;padding:56px 24px;text-align:center;line-height:1.5;color:#22262a">' +
+      '<img src="icon-192.png" alt="" style="width:96px;height:96px;border-radius:22px"><h2 style="margin:16px 0 6px">Almost there</h2>' +
+      '<p style="margin:0 0 16px">Copy the link Lucas sent you, paste it here, and tap Open. You only do this once.</p>' +
+      '<input id="lk" placeholder="Paste the link" style="width:100%;box-sizing:border-box;font-size:17px;padding:14px;border:2px solid #ffb27a;border-radius:14px">' +
+      '<button id="go" style="margin-top:12px;width:100%;font-size:17px;font-weight:700;padding:14px;border:0;border-radius:14px;background:#ff7a2e;color:#fff">Open</button>' +
+      '<p id="bad" style="color:#d6453d;display:none">That link has no family code in it. Copy the whole link.</p></div>';
+    document.getElementById('go').onclick = function(){ var m = String(document.getElementById('lk').value).match(/k=([A-Za-z0-9]{8,})/) || String(document.getElementById('lk').value).trim().match(/^([A-Za-z0-9]{12,})$/);
+      if (!m) { document.getElementById('bad').style.display = 'block'; return; }
+      try { localStorage.setItem('gl_key', m[1]); } catch(e) {} location.hash = 'k=' + m[1]; location.reload(); }; }); })();
 </script>
 <script>
 function E(){ return String.fromCodePoint.apply(null, arguments); }
@@ -475,9 +485,9 @@ function askWho(){
   $('sheet').querySelectorAll('[data-w]').forEach(function(b){ b.onclick=function(){ who=b.dataset.w; try{localStorage.setItem('gl_who',who);}catch(e){} closeSheet(); toast('Hi '+who+'! '+E(0x1f44b)); }; });
 }
 
-applyTheme(); load(); if (!who) askWho();
-setInterval(function(){ if (!document.hidden && !rec && !gListen && !$('dlgbg').classList.contains('open')) load(); }, 20000);
-document.addEventListener('visibilitychange', function(){ if (!document.hidden) load(); });
+if (!window.GL_NOKEY) { applyTheme(); load(); if (!who) askWho(); }
+setInterval(function(){ if (!window.GL_NOKEY && !document.hidden && !rec && !gListen && !$('dlgbg').classList.contains('open')) load(); }, 20000);
+document.addEventListener('visibilitychange', function(){ if (!window.GL_NOKEY && !document.hidden) load(); });
 </script>
 </body>
 </html>
