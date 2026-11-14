@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Our Lists</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
-<link rel="apple-touch-icon" href="apple-touch-icon-180.png">
+<link rel="manifest" href="manifest.webmanifest?v=3">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48-v3.png">
+<link rel="apple-touch-icon" href="apple-touch-icon-180-v3.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Our Lists">
 <meta name="theme-color" content="#fbf8f3">
 <script src="config.js"></script>
-<!-- Family Lists (GL1) web app page. Engine Room / Continue family grocery list app. GL1.6 look: Mon Nov 9 2026 12:40 AM PT; GL1.7 Tue Nov 10 9:30 AM PT: cart ticks keep aisle colour, toast always dark; GL1.9 Fri Nov 13 11:15 PM PT: Paste a key button (Smart helper); GL1.10 Sat Nov 14 PT: House rules
+<!-- Family Lists (GL1) web app page. Engine Room / Continue family grocery list app. GL1.6 look: Mon Nov 9 2026 12:40 AM PT; GL1.7 Tue Nov 10 9:30 AM PT: cart ticks keep aisle colour, toast always dark; GL1.9 Fri Nov 13 11:15 PM PT: Paste a key button (Smart helper); GL1.10 Sat Nov 14 PT: House rules; GL1.11 Sat Nov 14 2026 PT: four looks (Market, Ledger, Notebook, Midnight) + Original, Aa button
      (Lucas: simple, colourful, practical for Brittany). Each list has its own colour, each aisle its own colour,
      in-app dialogs (no browser pop-ups), Usuals quick-add, Undo on remove, cart progress bar. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -144,11 +144,238 @@ main{padding:6px 16px 150px;max-width:640px;margin:0 auto}
 .dlg .btns button{font:inherit;font-weight:800;font-size:16px;padding:13px;border-radius:14px;border:0;background:var(--bg);color:var(--ink)}
 .dlg .btns .main{background:var(--accent);color:var(--accent-ink)}
 .dlg .btns .danger{background:var(--warn);color:#fff}
+/* GL1.11 LOOKS (Engine Room / Continue family grocery list app, Sat Nov 14 2026 PT). Four very different looks; html[data-look] picks one.
+   original = the GL1.6 look (no data-look). Each look changes type, colour, surface, shapes and wording. */
+.brand{display:none}
+.lookbtn{border:0;background:none;color:var(--muted);font:inherit;font-weight:800;font-size:15px;padding:8px 6px;flex:none}
+.looks{display:grid;gap:12px;margin-top:14px}
+.lk{display:block;width:100%;text-align:left;border:0;padding:0;cursor:pointer;border-radius:14px;overflow:hidden;outline:3px solid transparent;outline-offset:2px}
+.lk.sel{outline-color:var(--accent)}
+.lk .in{padding:16px 16px 14px;min-height:112px;position:relative}
+.lk .nm{display:block;font-size:30px;line-height:1}
+.lk .ds{display:block;margin-top:8px;font-size:13px;opacity:.75}
+.lk .rw{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:15px}
+.lk .rw i{display:inline-block;width:16px;height:16px;flex:none}
+
+/* ---------- 1. MARKET: kraft paper, Fraunces italic, ticket cards, tomato red ---------- */
+html[data-look="market"]{--bg:#ece3d2;--card:#fbf6ec;--ink:#2a2419;--muted:#857a68;--line:#e2d7c3;--accent:#c4472b;--accent-ink:#fff;--done:#b4aa98;--warn:#c4472b;
+  --accent-soft:#f3e4d4;--shadow:0 1px 0 rgba(42,36,25,.10),0 8px 18px -12px rgba(42,36,25,.35)}
+html[data-look="market"] body{font-family:'Instrument Sans',system-ui,sans-serif;font-size:17px;
+  background:#ece3d2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .35 0 0 0 0 .2 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+html[data-look="market"] .top{background:#ece3d2;box-shadow:none;border-bottom:1px dashed #c9bba2}
+html[data-look="market"] .top::before{display:none}
+html[data-look="market"] .brand{display:block;font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+html[data-look="market"] h1{font-family:Fraunces,Georgia,serif;font-style:italic;font-weight:600;font-size:36px;letter-spacing:-.02em}
+html[data-look="market"] .sub{font-family:'DM Mono',monospace;font-size:12px;font-weight:400;letter-spacing:.04em}
+html[data-look="market"] .badge{border-radius:50%;background:transparent;border:1.5px solid var(--accent);color:var(--accent);font-family:Fraunces,serif;font-style:italic;font-weight:700;font-size:22px;transform:rotate(-8deg)}
+html[data-look="market"] .tab{background:transparent;box-shadow:none;border:1px solid #c9bba2;border-radius:3px;font-family:'DM Mono',monospace;font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:8px 12px}
+html[data-look="market"] .tab.sel{background:var(--ink);border-color:var(--ink);color:#fbf6ec}
+html[data-look="market"] .tab .n{background:transparent;color:inherit;opacity:.6;min-width:0;padding:0 0 0 2px}
+html[data-look="market"] .tab.new{border-style:dashed}
+html[data-look="market"] .prog .track{height:3px;border-radius:0;background:#d9ccb4}
+html[data-look="market"] .prog .fill{border-radius:0}
+html[data-look="market"] .section h2 .pill{background:none;padding:0;border-radius:0;font-family:'DM Mono',monospace;font-weight:500;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+html[data-look="market"] .section h2 .pill::before{content:"";width:9px;height:9px;background:var(--cc,var(--muted));border-radius:50%}
+html[data-look="market"] .section h2 .n{font-family:'DM Mono',monospace;font-weight:400;font-size:11px}
+html[data-look="market"] .card{border-radius:4px;border:1px solid var(--line);border-left:1px solid var(--line)}
+html[data-look="market"] .item{border-top:1px dashed #d8ccb6}
+html[data-look="market"] .name{font-weight:500}
+html[data-look="market"] .box{border-radius:3px;width:24px;height:24px;border:1.5px solid #a99c86}
+html[data-look="market"] .item.done .box{background:var(--accent);border-color:var(--accent)}
+html[data-look="market"] .item.done .box::after{width:6px;height:11px}
+html[data-look="market"] .item.done .name{text-decoration-color:var(--accent)}
+html[data-look="market"] .uchip{background:transparent;border:1px dashed #a99c86;border-radius:3px;font-weight:500}
+html[data-look="market"] .usuals .lab,html[data-look="market"] .pp{font-family:'DM Mono',monospace;font-weight:500;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+html[data-look="market"] .bar{background:linear-gradient(to top,#ece3d2 70%,transparent)}
+html[data-look="market"] .bar form{border-radius:6px;border:1px solid var(--ink);box-shadow:0 10px 24px -14px rgba(42,36,25,.6)}
+html[data-look="market"] .round{border-radius:4px}
+html[data-look="market"] .empty b{font-family:Fraunces,serif;font-style:italic;font-weight:400;font-size:44px;color:var(--accent)}
+html[data-look="market"] .empty{font-family:Fraunces,serif;font-style:italic;font-size:20px;font-weight:400}
+html[data-look="market"] .clear,html[data-look="market"] .gbtn,html[data-look="market"] .row3 button,html[data-look="market"] .chip,html[data-look="market"] .pref,html[data-look="market"] .row2 button,html[data-look="market"] .dlg .btns button{border-radius:4px}
+html[data-look="market"] .sheet{border-radius:8px 8px 0 0;background:#fbf6ec}
+html[data-look="market"] .sheet h3,html[data-look="market"] .dlg h4{font-family:Fraunces,serif;font-style:italic;font-weight:600;font-size:26px}
+html[data-look="market"] .dlg{border-radius:6px}
+html[data-look="market"] .toast{background:#2a2419;border-radius:4px;font-weight:500}
+html[data-look="market"] .slot b{font-family:'DM Mono',monospace;font-weight:500}
+html[data-look="market"] .dl{font-family:Fraunces,serif;font-style:italic;font-size:17px;font-weight:600}
+
+/* ---------- 2. LEDGER: Swiss / poster, Anton caps, hard black lines, signal yellow ---------- */
+html[data-look="ledger"]{--bg:#f2f1ec;--card:#ffffff;--ink:#0b0b0b;--muted:#575757;--line:#0b0b0b;--accent:#0b0b0b;--accent-ink:#ffd60a;--done:#9a9a9a;--warn:#ff3b1f;
+  --accent-soft:#ffd60a;--shadow:5px 5px 0 #0b0b0b}
+html[data-look="ledger"] body{font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:17px;background:#f2f1ec}
+html[data-look="ledger"] .top{background:#f2f1ec;box-shadow:none;border-bottom:3px solid #0b0b0b}
+html[data-look="ledger"] .top::before{height:10px;background:#ffd60a!important}
+html[data-look="ledger"] .brand{display:block;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+html[data-look="ledger"] h1{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:48px;text-transform:uppercase;letter-spacing:.005em;line-height:.92}
+html[data-look="ledger"] .sub{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:12px;text-transform:uppercase;color:#0b0b0b;margin-top:4px}
+html[data-look="ledger"] .badge{border-radius:0;background:#ffd60a;border:2.5px solid #0b0b0b;color:#0b0b0b;font-family:Anton,sans-serif;font-size:28px;width:52px;height:52px}
+html[data-look="ledger"] .lookbtn{color:#0b0b0b;font-family:'IBM Plex Mono',monospace}
+html[data-look="ledger"] .tab{border-radius:0;border:2px solid #0b0b0b;box-shadow:none;background:#fff;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:12.5px;text-transform:uppercase}
+html[data-look="ledger"] .tab.sel{background:#0b0b0b;color:#ffd60a;border-color:#0b0b0b}
+html[data-look="ledger"] .tab .n{border-radius:0;background:#ffd60a;color:#0b0b0b}
+html[data-look="ledger"] .tab.sel .n{background:#ffd60a;color:#0b0b0b}
+html[data-look="ledger"] .prog .track{height:12px;border-radius:0;border:2px solid #0b0b0b;background:#fff}
+html[data-look="ledger"] .prog .fill{border-radius:0;background:#ffd60a}
+html[data-look="ledger"] .section{margin-top:26px}
+html[data-look="ledger"] .section h2 .pill{border-radius:0;background:#0b0b0b;color:#fff;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding:5px 10px}
+html[data-look="ledger"] .section h2 .pill::before{content:"";width:10px;height:10px;background:var(--cc,#fff)}
+html[data-look="ledger"] .section h2 .n{font-family:Anton,sans-serif;font-size:20px;color:#0b0b0b;font-weight:400}
+html[data-look="ledger"] .card{border-radius:0;border:2.5px solid #0b0b0b}
+html[data-look="ledger"] .item{border-top:2px solid #0b0b0b;min-height:60px}
+html[data-look="ledger"] .name{font-weight:600}
+html[data-look="ledger"] .meta{font-family:'IBM Plex Mono',monospace;text-transform:uppercase;font-size:11px}
+html[data-look="ledger"] .who-dot{border-radius:0}
+html[data-look="ledger"] .box{border-radius:0;border:2.5px solid #0b0b0b}
+html[data-look="ledger"] .item.done .box{background:#0b0b0b;border-color:#0b0b0b}
+html[data-look="ledger"] .item.done .box::after{border-color:#ffd60a}
+html[data-look="ledger"] .item.done .name{text-decoration-thickness:2px;text-decoration-color:#0b0b0b}
+html[data-look="ledger"] .more{color:#0b0b0b}
+html[data-look="ledger"] .uchip{border-radius:0;border:2px solid #0b0b0b;background:#fff;font-weight:600}
+html[data-look="ledger"] .uchip b{color:#0b0b0b}
+html[data-look="ledger"] .usuals .lab,html[data-look="ledger"] .pp{font-family:'IBM Plex Mono',monospace;font-weight:500;text-transform:uppercase;color:#0b0b0b}
+html[data-look="ledger"] .bar{background:linear-gradient(to top,#f2f1ec 70%,transparent)}
+html[data-look="ledger"] .bar form{border-radius:0;border:2.5px solid #0b0b0b;box-shadow:5px 5px 0 #0b0b0b;padding:0;gap:0}
+html[data-look="ledger"] .bar input{font-family:'IBM Plex Mono',monospace;font-weight:500;padding:14px 12px}
+html[data-look="ledger"] .bar .round{width:56px;height:56px;border-radius:0}
+html[data-look="ledger"] .mic{background:#fff;color:#0b0b0b;border-right:2.5px solid #0b0b0b!important}
+html[data-look="ledger"] .add{background:#ffd60a;color:#0b0b0b;border-left:2.5px solid #0b0b0b!important;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:32px}
+html[data-look="ledger"] .empty b{font-family:Anton,sans-serif;font-weight:400;font-size:96px;line-height:1;color:#0b0b0b}
+html[data-look="ledger"] .empty{font-family:'IBM Plex Mono',monospace;font-weight:500;text-transform:uppercase;color:#0b0b0b}
+html[data-look="ledger"] .clear,html[data-look="ledger"] .gbtn,html[data-look="ledger"] .row3 button,html[data-look="ledger"] .chip,html[data-look="ledger"] .pref,html[data-look="ledger"] .row2 button,html[data-look="ledger"] .dlg .btns button{border-radius:0;border:2px solid #0b0b0b;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;font-weight:500}
+html[data-look="ledger"] .clear,html[data-look="ledger"] .gbtn,html[data-look="ledger"] .dlg .btns .main{background:#ffd60a;color:#0b0b0b}
+html[data-look="ledger"] .chip.sel{background:#0b0b0b;color:#ffd60a}
+html[data-look="ledger"] .sheet{border-radius:0;border-top:4px solid #0b0b0b}
+html[data-look="ledger"] .sheet h3,html[data-look="ledger"] .dlg h4{font-family:Anton,sans-serif;font-weight:400;font-size:32px;text-transform:uppercase}
+html[data-look="ledger"] .dlg{border-radius:0;border:3px solid #0b0b0b;box-shadow:8px 8px 0 #0b0b0b}
+html[data-look="ledger"] .dlg input{border-radius:0;border:2px solid #0b0b0b}
+html[data-look="ledger"] .toast{background:#0b0b0b;color:#ffd60a;border-radius:0;font-family:'IBM Plex Mono',monospace;font-weight:500;text-transform:uppercase;font-size:13px}
+html[data-look="ledger"] .toast button{color:#fff}
+html[data-look="ledger"] .day.today{background:#fff5bf}
+html[data-look="ledger"] .dl{font-family:Anton,sans-serif;font-weight:400;font-size:20px;text-transform:uppercase}
+html[data-look="ledger"] .slot b{color:#0b0b0b;font-family:'IBM Plex Mono',monospace}
+
+/* ---------- 3. NOTEBOOK: note on the fridge, handwriting, lined paper, tape, highlighter ---------- */
+html[data-look="notebook"]{--bg:#f1ede4;--card:#fffdf3;--ink:#1f3170;--muted:#6f7894;--line:#d3ddf0;--accent:#d8402f;--accent-ink:#fff;--done:#8d94ab;--warn:#d8402f;
+  --accent-soft:#fff3b8;--shadow:0 1px 2px rgba(0,0,0,.08),0 12px 18px -14px rgba(0,0,0,.35)}
+html[data-look="notebook"] body{font-family:Kalam,'Comic Sans MS',cursive;font-size:18px;
+  background:#f1ede4 radial-gradient(#d9d2c2 1px,transparent 1.3px) 0 0/22px 22px}
+html[data-look="notebook"] .top{background:#f1ede4;box-shadow:none}
+html[data-look="notebook"] .top::before{display:none}
+html[data-look="notebook"] .brand{display:block;font-family:Kalam,cursive;font-size:14px;color:var(--accent);transform:rotate(-2deg);transform-origin:left;margin-bottom:-2px}
+html[data-look="notebook"] h1{font-family:Caveat,cursive;font-weight:700;font-size:48px;line-height:.95;color:var(--ink)}
+html[data-look="notebook"] .sub{font-weight:400;font-size:15px}
+html[data-look="notebook"] .badge{border-radius:3px;background:#fff3b8;transform:rotate(-6deg);box-shadow:0 3px 6px rgba(0,0,0,.15)}
+html[data-look="notebook"] .lookbtn{font-family:Caveat,cursive;font-size:22px;color:var(--ink)}
+html[data-look="notebook"] .tabs{padding-top:16px;padding-bottom:8px}
+html[data-look="notebook"] .tab{border:0;border-radius:2px;background:color-mix(in srgb,var(--tc) 22%,#fffbe0);box-shadow:0 2px 5px rgba(0,0,0,.12);font-family:Caveat,cursive;font-weight:700;font-size:22px;padding:4px 14px;transform:rotate(-2deg)}
+html[data-look="notebook"] .tab:nth-child(even){transform:rotate(1.8deg)}
+html[data-look="notebook"] .tab.sel{background:color-mix(in srgb,var(--tc) 55%,#fffbe0);color:var(--ink);border:0;transform:rotate(0) translateY(-3px);box-shadow:0 6px 10px rgba(0,0,0,.18)}
+html[data-look="notebook"] .tab .n{background:transparent;color:var(--accent);font-family:Kalam,cursive;font-size:14px}
+html[data-look="notebook"] .tab.sel .n{background:transparent;color:var(--accent)}
+html[data-look="notebook"] .tab.new{border:0;box-shadow:none;background:transparent;transform:none}
+html[data-look="notebook"] .prog .track{height:6px;background:#dfe5f3}
+html[data-look="notebook"] .section{margin-top:28px}
+html[data-look="notebook"] .section h2 .pill{border-radius:0;padding:0 6px;font-family:Caveat,cursive;font-weight:700;font-size:26px;color:var(--ink);
+  background:linear-gradient(transparent 48%,color-mix(in srgb,var(--cc,#ffe066) 45%,transparent) 48%,color-mix(in srgb,var(--cc,#ffe066) 45%,transparent) 90%,transparent 90%)}
+html[data-look="notebook"] .section h2 .n{font-family:Kalam,cursive;color:var(--muted)}
+html[data-look="notebook"] .card{border:0;border-radius:2px;overflow:visible;position:relative;transform:rotate(-.5deg)}
+html[data-look="notebook"] .section:nth-child(even) .card{transform:rotate(.45deg)}
+html[data-look="notebook"] .card::before{content:"";position:absolute;top:0;bottom:0;left:52px;width:2px;background:#f2aca3;pointer-events:none}
+html[data-look="notebook"] .card::after{content:"";position:absolute;top:-10px;left:50%;width:84px;height:22px;transform:translateX(-50%) rotate(-3deg);background:rgba(255,231,140,.72);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+html[data-look="notebook"] .item{border-top:1px solid #d3ddf0;padding-left:16px}
+html[data-look="notebook"] .item:first-child{padding-top:18px}
+html[data-look="notebook"] .name{font-weight:400;font-size:19px;padding-left:10px}
+html[data-look="notebook"] .meta{font-size:13px;font-weight:400}
+html[data-look="notebook"] .box{width:24px;height:24px;border:2px solid var(--ink);border-radius:55% 45% 52% 48%/48% 55% 45% 52%}
+html[data-look="notebook"] .item.done .box{background:transparent;border-color:var(--ink)}
+html[data-look="notebook"] .item.done .box::after{border-color:var(--accent)}
+html[data-look="notebook"] .item.done .name{text-decoration:line-through;text-decoration-color:var(--accent);text-decoration-thickness:2px;color:var(--muted)}
+html[data-look="notebook"] .uchip{background:#fff3b8;border-radius:2px;box-shadow:0 2px 4px rgba(0,0,0,.12);font-family:Caveat,cursive;font-weight:700;font-size:21px;padding:4px 12px}
+html[data-look="notebook"] .uchip:nth-child(odd){transform:rotate(-1.5deg)}
+html[data-look="notebook"] .uchip b{color:var(--accent)}
+html[data-look="notebook"] .usuals .lab,html[data-look="notebook"] .pp{font-family:Caveat,cursive;font-weight:700;font-size:22px;color:var(--ink)}
+html[data-look="notebook"] .bar{background:linear-gradient(to top,#f1ede4 70%,transparent)}
+html[data-look="notebook"] .bar form{border:0;border-radius:3px;background:#fffdf3;box-shadow:0 2px 4px rgba(0,0,0,.1),0 14px 22px -14px rgba(0,0,0,.4);transform:rotate(-.4deg)}
+html[data-look="notebook"] .bar input{font-family:Caveat,cursive;font-size:26px;font-weight:600;color:var(--ink)}
+html[data-look="notebook"] .mic{background:#fff3b8;color:var(--ink)}
+html[data-look="notebook"] .add{background:var(--accent)}
+html[data-look="notebook"] .empty{font-family:Caveat,cursive;font-size:28px;font-weight:600;color:var(--ink)}
+html[data-look="notebook"] .clear{background:#fff3b8;border-radius:3px;font-family:Caveat,cursive;font-size:22px;box-shadow:0 2px 4px rgba(0,0,0,.12)}
+html[data-look="notebook"] .sheet{background:#fffdf3;border-radius:4px 4px 0 0}
+html[data-look="notebook"] .sheet h3,html[data-look="notebook"] .dlg h4{font-family:Caveat,cursive;font-weight:700;font-size:32px}
+html[data-look="notebook"] .dlg{background:#fffdf3;border-radius:3px;transform:rotate(-.6deg)}
+html[data-look="notebook"] .chip,html[data-look="notebook"] .row3 button,html[data-look="notebook"] .pref{border-radius:3px}
+html[data-look="notebook"] .gbtn{border-radius:3px;font-family:Caveat,cursive;font-size:24px}
+html[data-look="notebook"] .toast{background:var(--ink);border-radius:3px;font-weight:400}
+html[data-look="notebook"] .dl{font-family:Caveat,cursive;font-size:22px}
+html[data-look="notebook"] .slot b{font-family:Kalam,cursive;color:var(--accent)}
+
+/* ---------- 4. MIDNIGHT: luxe pantry, deep green-black, ivory + brass, Cormorant italic ---------- */
+html[data-look="midnight"]{--bg:#0d1210;--card:#131a17;--ink:#ece4d4;--muted:#8f897c;--line:#25302b;--accent:#c9a86a;--accent-ink:#15120b;--done:#5d5a52;--warn:#d07a5c;
+  --accent-soft:rgba(201,168,106,.12);--shadow:none;--green:#7fae86;--red:#d07a5c;--amber:#c9a86a}
+html[data-look="midnight"] body{font-family:Jost,system-ui,sans-serif;font-weight:400;font-size:17px;letter-spacing:.01em;
+  background:#0d1210 radial-gradient(120% 60% at 50% -10%,rgba(201,168,106,.10),transparent 60%) no-repeat}
+html[data-look="midnight"] .top{background:rgba(13,18,16,.94);box-shadow:none;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+html[data-look="midnight"] .top::before{display:none}
+html[data-look="midnight"] .brand{display:block;font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+html[data-look="midnight"] h1{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:500;font-size:42px;letter-spacing:-.005em;line-height:1}
+html[data-look="midnight"] .sub{font-weight:300;font-size:13px;letter-spacing:.06em}
+html[data-look="midnight"] .badge{border-radius:50%;background:transparent;border:1px solid var(--accent);color:var(--accent);font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:26px}
+html[data-look="midnight"] .lookbtn{color:var(--accent);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px}
+html[data-look="midnight"] .tabs{gap:18px}
+html[data-look="midnight"] .tab{background:transparent;box-shadow:none;border:0;border-bottom:1px solid transparent;border-radius:0;padding:8px 0;font-size:11.5px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+html[data-look="midnight"] .tab.sel{background:transparent;color:var(--accent);border-color:transparent;border-bottom:1px solid var(--accent)}
+html[data-look="midnight"] .tab .n{background:transparent;color:inherit;opacity:.7;min-width:0;letter-spacing:0}
+html[data-look="midnight"] .tab.sel .n{background:transparent;color:inherit}
+html[data-look="midnight"] .tab.new{border:0;color:var(--muted)}
+html[data-look="midnight"] .prog .track{height:1px;background:var(--line)}
+html[data-look="midnight"] .prog .fill{height:1px}
+html[data-look="midnight"] .section{margin-top:30px}
+html[data-look="midnight"] .section h2 .pill{background:none;padding:0;border-radius:0;font-size:10.5px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);gap:10px}
+html[data-look="midnight"] .section h2 .pill::before{content:"";width:6px;height:6px;background:var(--cc,var(--accent));transform:rotate(45deg)}
+html[data-look="midnight"] .section h2 .n{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--accent)}
+html[data-look="midnight"] .card{background:transparent;border:0;border-radius:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+html[data-look="midnight"] .item{border-top:1px solid var(--line);padding:16px 2px;min-height:60px}
+html[data-look="midnight"] .name{font-weight:400}
+html[data-look="midnight"] .meta{font-weight:300;letter-spacing:.04em}
+html[data-look="midnight"] .who-dot{background:transparent!important;border:1px solid var(--muted);color:var(--muted);font-weight:500}
+html[data-look="midnight"] .box{width:22px;height:22px;border:1px solid var(--accent)}
+html[data-look="midnight"] .item.done .box{background:var(--accent);border-color:var(--accent)}
+html[data-look="midnight"] .item.done .box::after{width:5px;height:10px;border-color:#15120b;border-width:0 2px 2px 0}
+html[data-look="midnight"] .item.done .name{color:var(--done);text-decoration-thickness:1px}
+html[data-look="midnight"] .uchip{background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:400;font-size:14px}
+html[data-look="midnight"] .uchip b{color:var(--accent);font-weight:400}
+html[data-look="midnight"] .usuals .lab,html[data-look="midnight"] .pp{font-size:10.5px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
+html[data-look="midnight"] .bar{background:linear-gradient(to top,#0d1210 70%,transparent)}
+html[data-look="midnight"] .bar form{border-radius:2px;background:#131a17;border:1px solid #34403a;box-shadow:0 18px 40px -20px #000}
+html[data-look="midnight"] .bar input{font-weight:300;letter-spacing:.02em}
+html[data-look="midnight"] .mic{background:transparent;color:var(--accent);border:1px solid #34403a}
+html[data-look="midnight"] .add{background:var(--accent);color:#15120b;font-weight:300}
+html[data-look="midnight"] .empty b{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:46px;color:var(--accent)}
+html[data-look="midnight"] .empty{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;font-weight:500;color:var(--ink)}
+html[data-look="midnight"] .clear,html[data-look="midnight"] .row3 button,html[data-look="midnight"] .row2 button{background:transparent;border:1px solid #34403a;border-radius:2px;color:var(--ink);font-weight:400;letter-spacing:.08em}
+html[data-look="midnight"] .gbtn{border-radius:2px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;font-size:13px}
+html[data-look="midnight"] .chip,html[data-look="midnight"] .pref{background:transparent;border:1px solid #34403a;font-weight:400}
+html[data-look="midnight"] .chip.sel{background:var(--accent);color:#15120b;border-color:var(--accent)}
+html[data-look="midnight"] .pref button{background:transparent}
+html[data-look="midnight"] .sheet{background:#131a17;border-radius:0;border-top:1px solid var(--accent)}
+html[data-look="midnight"] .sheet h3,html[data-look="midnight"] .dlg h4{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:30px}
+html[data-look="midnight"] .dlg{background:#131a17;border:1px solid #34403a;border-radius:2px}
+html[data-look="midnight"] .dlg .btns button{border-radius:2px;background:transparent;border:1px solid #34403a;font-weight:400}
+html[data-look="midnight"] .dlg .btns .main{background:var(--accent);border-color:var(--accent);color:#15120b}
+html[data-look="midnight"] .toast{background:#ece4d4;color:#0d1210;border-radius:2px;font-weight:500}
+html[data-look="midnight"] .toast button{color:#8a6a2a;filter:none}
+html[data-look="midnight"] .day{border-top:1px solid var(--line)}
+html[data-look="midnight"] .day.today{background:rgba(201,168,106,.07)}
+html[data-look="midnight"] .dl{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;font-weight:600}
+html[data-look="midnight"] .slot{font-weight:400}
+html[data-look="notebook"] .card:has(.day)::before{left:84px}
+html[data-look="midnight"] .slot b{font-weight:500;letter-spacing:.22em;font-size:10px}
 </style>
 </head>
 <body>
 <div class="top">
-  <header><div class="badge" id="badge"></div><div class="htxt"><h1 id="title">Shopping</h1><div class="sub" id="sub">Loading&#x2026;</div></div></header>
+  <header><div class="badge" id="badge"></div><div class="htxt"><div class="brand" id="brand"></div><h1 id="title">Shopping</h1><div class="sub" id="sub">Loading&#x2026;</div></div><button class="lookbtn" id="lookbtn" aria-label="Change the look">Aa</button></header>
   <div class="prog" id="prog"><div class="track"><div class="fill" id="pfill" style="width:0"></div></div></div>
   <nav class="tabs" id="tabs"></nav>
 </div>
@@ -171,7 +398,7 @@ main{padding:6px 16px 150px;max-width:640px;margin:0 auto}
 (function(){ var has = /k=[A-Za-z0-9]+/.test(location.hash); try { has = has || !!localStorage.getItem('gl_key'); } catch(e) {}
   if (has) return; window.GL_NOKEY = true; document.addEventListener('DOMContentLoaded', function(){
     document.body.innerHTML = '<div style="font-family:Nunito,system-ui,sans-serif;max-width:420px;margin:0 auto;padding:56px 24px;text-align:center;line-height:1.5;color:#22262a">' +
-      '<img src="icon-192.png" alt="" style="width:96px;height:96px;border-radius:22px"><h2 style="margin:16px 0 6px">Almost there</h2>' +
+      '<img src="icon-192-v3.png" alt="" style="width:96px;height:96px;border-radius:22px"><h2 style="margin:16px 0 6px">Almost there</h2>' +
       '<p style="margin:0 0 16px">Copy the link Lucas sent you, paste it here, and tap Open. You only do this once.</p>' +
       '<input id="lk" placeholder="Paste the link" style="width:100%;box-sizing:border-box;font-size:17px;padding:14px;border:2px solid #ffb27a;border-radius:14px">' +
       '<button id="go" style="margin-top:12px;width:100%;font-size:17px;font-weight:700;padding:14px;border:0;border-radius:14px;background:#ff7a2e;color:#fff">Open</button>' +
@@ -202,6 +429,78 @@ var who = null; try { who = localStorage.getItem('gl_who'); } catch(e) {}
 var $ = function(id){ return document.getElementById(id); };
 
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+/* GL1.11 LOOKS: four very different looks, picked per phone (Aa button, top right). Each has its own type, colours, surface and words. */
+var LOOKS = {
+  market: {name:'Market', ds:'Kraft paper, serif italics, tomato red. A Saturday farmers\' market.', theme:'#ece3d2',
+    fonts:'family=Fraunces:ital,wght@0,400;0,600;1,400;1,600;1,700&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500',
+    brand:'Saturday Market', noEmoji:true, mark:'~',
+    ph:'Leeks, sourdough, two lemons...', phNote:'Write it down...', phMeals:'Try "Lexi is done with ham"',
+    cart:'In the basket', clear:function(n){return 'Empty the basket ('+n+')';}, usuals:'Regulars',
+    empty:function(c){return 'Nothing on the '+c.toLowerCase()+' list.<br>Say it or write it below.';}, allDone:'Basket full. Off you go.',
+    sub:function(o,d){return o+' to find'+(d?'  /  '+d+' in the basket':'');},
+    tone:function(c){return 'color-mix(in srgb, '+c+' 62%, #4a3a22)';}},
+  ledger: {name:'Ledger', ds:'Poster type, hard black lines, signal yellow. No nonsense.', theme:'#f2f1ec',
+    fonts:'family=Anton&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500',
+    brand:'Errands / Household Ops', noEmoji:true, mark:'0', initial:true,
+    ph:'Type it. Or say it.', phNote:'Write it.', phMeals:'Say "No fajitas on Thursdays"',
+    cart:'Got it', clear:function(n){return 'Clear '+n+' got';}, usuals:'Always buying',
+    empty:function(){return 'Nothing to get.<br>Add something below.';}, allDone:'Done. Go home.',
+    sub:function(o,d){return o+' left'+(d?' / '+d+' got':'');},
+    tone:function(c){return c;}},
+  notebook: {name:'Notebook', ds:'A handwritten note stuck to the fridge. Tape, doodles, highlighter.', theme:'#f1ede4',
+    fonts:'family=Caveat:wght@500;600;700&family=Kalam:wght@400;700',
+    brand:'stuck to the fridge', noEmoji:false,
+    ph:'jot it down...', phNote:'scribble a note...', phMeals:'say "Friday is pizza night"',
+    cart:'Crossed off', clear:function(n){return 'Tear off the '+n+' crossed off';}, usuals:'We always get...',
+    empty:function(){return 'Nothing on this note yet!<br>Say it or scribble it below.';}, allDone:'All crossed off!',
+    sub:function(o,d){return o+' to grab'+(d?', '+d+' crossed off':'');},
+    tone:function(c){return c;}},
+  midnight: {name:'Midnight', ds:'Deep green-black, ivory and brass. A quiet, grown-up pantry.', theme:'#0d1210',
+    fonts:'family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500;1,600&family=Jost:wght@300;400;500',
+    brand:'The Pantry  \u00b7  Provisions', noEmoji:true, mark:'\u2726', initial:true,
+    ph:'Add to provisions...', phNote:'A note...', phMeals:'Speak a house rule...',
+    cart:'Gathered', clear:function(n){return 'Clear '+n+' gathered';}, usuals:'Standing order',
+    empty:function(){return 'The shelf is bare.<br>Speak or write below.';}, allDone:'Everything gathered.',
+    sub:function(o,d){return o+' outstanding'+(d?'  \u00b7  '+d+' gathered':'');},
+    tone:function(c){return 'color-mix(in srgb, '+c+' 55%, #c9a86a)';}},
+  original: {name:'Original', ds:'The bright, rounded look from before.', theme:'#fbf8f3', noEmoji:false,
+    ph:'Add milk, eggs, bananas...', phNote:'Add a note...', phMeals:'Say "Lexi doesn\'t want ham anymore"',
+    cart:'In the cart', clear:function(n){return 'Clear '+n+' from the list';}, usuals:'Usuals, tap to add',
+    empty:function(c){return esc(c)+' is empty.<br>Tap the mic or type below.';}, allDone:'All done! '+E(0x1f389),
+    sub:function(o,d){return o+(o===1?' item':' items')+(d?' to go, '+d+' in the cart':'');},
+    tone:function(c){return c;}}
+};
+var LOOK_IDS = ['market','ledger','notebook','midnight','original'];
+var lookId = 'market'; try { lookId = localStorage.getItem('gl_look') || 'market'; } catch(e) {}
+if (!LOOKS[lookId]) lookId = 'market';
+function LK(){ return LOOKS[lookId]; }
+function em(x){ return LK().noEmoji ? '' : x + ' '; }
+function tone(c){ return LK().tone(c); }
+function loadFonts(id){ var f = LOOKS[id].fonts; if (!f || document.getElementById('lf-'+id)) return;
+  var l = document.createElement('link'); l.id = 'lf-'+id; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?'+f+'&display=swap'; document.head.appendChild(l); }
+function applyLook(){
+  var h = document.documentElement; if (lookId==='original') h.removeAttribute('data-look'); else h.setAttribute('data-look', lookId);
+  loadFonts(lookId); $('brand').textContent = LK().brand || '';
+  var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', LK().theme);
+}
+function setLook(id){ lookId = id; try { localStorage.setItem('gl_look', id); } catch(e) {} applyLook(); render(); }
+function openLooks(){
+  LOOK_IDS.forEach(loadFonts);
+  var P = {
+    market:  'background:#ece3d2;color:#2a2419|font-family:Fraunces,serif;font-style:italic;font-weight:600|font-family:\'DM Mono\',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase|border:1.5px solid #a99c86;border-radius:3px',
+    ledger:  'background:#fff;color:#0b0b0b;border:3px solid #0b0b0b;box-shadow:inset 0 10px 0 #ffd60a|font-family:Anton,sans-serif;text-transform:uppercase|font-family:\'IBM Plex Mono\',monospace;font-size:12px;text-transform:uppercase|border:2.5px solid #0b0b0b',
+    notebook:'background:#fffdf3 repeating-linear-gradient(transparent 0 27px,#d3ddf0 27px 28px);color:#1f3170|font-family:Caveat,cursive;font-weight:700;font-size:38px|font-family:Kalam,cursive;font-size:15px|border:2px solid #1f3170;border-radius:55% 45% 52% 48%',
+    midnight:'background:#0d1210;color:#ece4d4;border:1px solid #34403a|font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500|font-family:Jost,sans-serif;font-size:11px;letter-spacing:.28em;text-transform:uppercase|border:1px solid #c9a86a;border-radius:50%',
+    original:'background:#fbf8f3;color:#22262a;border:1px solid #ece6dc|font-family:Nunito,sans-serif;font-weight:800|font-family:Nunito,sans-serif;font-size:14px;font-weight:700|border:2.5px solid #2f9e6e;border-radius:50%'
+  };
+  var SAMPLE = {market:'Sourdough', ledger:'Paper towels', notebook:'birthday candles', midnight:'Olive oil', original:'Bananas'};
+  $('sheet').innerHTML = '<h3>Pick a look</h3><div class="sub">Just for this phone. Change it any time.</div><div class="looks">'+
+    LOOK_IDS.map(function(id){ var p = P[id].split('|'), L = LOOKS[id];
+      return '<button class="lk'+(id===lookId?' sel':'')+'" data-look="'+id+'"><div class="in" style="'+p[0]+'"><span class="nm" style="'+p[1]+'">'+esc(L.name)+'</span>'+
+        '<span class="ds" style="'+p[2]+'">'+esc(L.ds)+'</span><span class="rw" style="'+p[2]+'"><i style="'+p[3]+'"></i>'+esc(SAMPLE[id])+'</span></div></button>'; }).join('')+'</div>';
+  $('sheet').classList.add('open'); $('sbg').classList.add('open');
+  $('sheet').querySelectorAll('[data-look]').forEach(function(b){ b.onclick = function(){ setLook(b.dataset.look); closeSheet(); toast(LOOKS[b.dataset.look].name+' look on.'); }; });
+}
 function toast(msg, label, fn){ var t=$('toast'); t.innerHTML=''; var sp=document.createElement('span'); sp.textContent=msg; t.appendChild(sp);
   t.classList.toggle('act', !!label);
   if (label){ var b=document.createElement('button'); b.textContent=label; b.onclick=function(){ t.classList.remove('show','act'); fn(); }; t.appendChild(b); }
@@ -244,35 +543,35 @@ function ask(o){
 
 function applyTheme(){
   var c = listColor(cur), r = document.documentElement.style;
-  r.setProperty('--accent', c);
-  r.setProperty('--accent-ink', c===LIST_COLOR.Notes ? '#2b2100' : '#ffffff');
-  $('badge').textContent = listEmoji(cur);
+  if (lookId !== 'original'){ r.removeProperty('--accent'); r.removeProperty('--accent-ink'); }
+  else { r.setProperty('--accent', c); r.setProperty('--accent-ink', c===LIST_COLOR.Notes ? '#2b2100' : '#ffffff'); }
+  $('badge').textContent = LK().noEmoji ? cur.charAt(0).toUpperCase() : listEmoji(cur);
 }
 function renderTabs(){
   var ls = state.lists.length ? state.lists : [{name:'Shopping',emoji:E(0x1f6d2)}];
-  $('tabs').innerHTML = ls.map(function(l){ var n=state.counts[l.name]||0; return '<button class="tab'+(l.name===cur?' sel':'')+'" style="--tc:'+listColor(l.name)+'" data-list="'+esc(l.name)+'">'+(l.emoji?l.emoji+' ':'')+esc(l.name)+(n?'<span class="n">'+n+'</span>':'')+'</button>'; }).join('')+
-    '<button class="tab'+(cur===MEALS?' sel':'')+'" style="--tc:'+LIST_COLOR.Meals+'" data-list="Meals">'+E(0x1f37d)+' Meals</button>'+
+  $('tabs').innerHTML = ls.map(function(l){ var n=state.counts[l.name]||0; return '<button class="tab'+(l.name===cur?' sel':'')+'" style="--tc:'+tone(listColor(l.name))+'" data-list="'+esc(l.name)+'">'+(l.emoji?em(l.emoji):'')+esc(l.name)+(n?'<span class="n">'+n+'</span>':'')+'</button>'; }).join('')+
+    '<button class="tab'+(cur===MEALS?' sel':'')+'" style="--tc:'+tone(LIST_COLOR.Meals)+'" data-list="Meals">'+em(E(0x1f37d))+'Meals</button>'+
     '<button class="tab new" id="newlist">+ New list</button>';
   var sel=document.querySelector('.tab.sel'); if(sel&&sel.scrollIntoView) sel.scrollIntoView({block:'nearest',inline:'center'});
   $('title').textContent = cur;
   applyTheme();
-  $('t').placeholder = cur===MEALS ? 'Say "Lexi doesn\'t want ham anymore"' : state.sorted ? 'Add milk, eggs, bananas...' : 'Add a note...';
+  $('t').placeholder = cur===MEALS ? LK().phMeals : state.sorted ? LK().ph : LK().phNote;
 }
 function render(){
   renderTabs();
   if (cur===MEALS){ $('prog').classList.remove('on'); renderMeals(); return; }
   var rows = state.rows, open = rows.filter(function(r){return !r.checked;}), done = rows.filter(function(r){return r.checked;});
-  $('sub').textContent = !rows.length ? 'Nothing here yet' : open.length ? (open.length + (open.length===1?' item':' items') + (state.sorted && done.length ? ' to go, '+done.length+' in the cart' : '')) : 'All done! '+E(0x1f389);
+  $('sub').textContent = !rows.length ? 'Nothing here yet' : open.length ? LK().sub(open.length, state.sorted ? done.length : 0) : LK().allDone;
   $('prog').classList.toggle('on', state.sorted && rows.length > 0);
   $('pfill').style.width = rows.length ? Math.round(100*done.length/rows.length)+'%' : '0';
   var html = usualsHtml();
-  if (!rows.length){ $('list').innerHTML = html + '<div class="empty"><b>'+(state.sorted?E(0x1f9fa):listEmoji(cur))+'</b>'+esc(cur)+' is empty.<br>Tap the mic or type below.</div>'; wireUsuals(); return; }
+  if (!rows.length){ $('list').innerHTML = html + '<div class="empty"><b>'+(LK().noEmoji ? esc(LK().mark||'') : state.sorted?E(0x1f9fa):listEmoji(cur))+'</b>'+LK().empty(cur)+'</div>'; wireUsuals(); return; }
   if (state.sorted){
     var groups = {}; open.forEach(function(r){ (groups[r.category]=groups[r.category]||[]).push(r); });
     var cats = state.order.filter(function(c){return groups[c];}).concat(Object.keys(groups).filter(function(c){return state.order.indexOf(c)<0;}));
-    html += cats.map(function(c){ return section(c, groups[c], CAT_COLOR[c]||CAT_COLOR.Other, EMOJI[c]||E(0x1f6d2)); }).join('');
-  } else { html += open.length ? section('', open, listColor(cur), '') : ''; }
-  if (done.length){ html += section(state.sorted ? 'In the cart' : 'Done', done, '#9aa3ab', E(0x2705)) + '<button class="clear" id="clr">Clear '+done.length+' from the list</button>'; }
+    html += cats.map(function(c){ return section(c, groups[c], tone(CAT_COLOR[c]||CAT_COLOR.Other), EMOJI[c]||E(0x1f6d2)); }).join('');
+  } else { html += open.length ? section('', open, tone(listColor(cur)), '') : ''; }
+  if (done.length){ html += section(state.sorted ? LK().cart : 'Done', done, '#9aa3ab', E(0x2705)) + '<button class="clear" id="clr">'+esc(LK().clear(done.length))+'</button>'; }
   $('list').innerHTML = html;
   wireUsuals();
   if ($('clr')) $('clr').onclick = function(){ state.rows = state.rows.filter(function(r){return !r.checked;}); render(); call('apiClearChecked',KEY,cur).then(set).catch(fail); };
@@ -280,7 +579,7 @@ function render(){
 function usualsHtml(){
   var u = (state.usuals||[]).filter(function(x){ return !state.rows.some(function(r){ return !r.checked && r.item.toLowerCase()===x.toLowerCase(); }); });
   if (!state.sorted || !u.length) return '';
-  return '<div class="usuals"><div class="lab">'+E(0x2b50)+' Usuals, tap to add</div><div class="urow">'+u.map(function(x){ return '<button class="uchip" data-usual="'+esc(x)+'"><b>+</b>'+esc(x)+'</button>'; }).join('')+'</div></div>';
+  return '<div class="usuals"><div class="lab">'+em(E(0x2b50))+esc(LK().usuals)+'</div><div class="urow">'+u.map(function(x){ return '<button class="uchip" data-usual="'+esc(x)+'"><b>+</b>'+esc(x)+'</button>'; }).join('')+'</div></div>';
 }
 function wireUsuals(){
   $('list').querySelectorAll('[data-usual]').forEach(function(b){ b.onclick = function(e){ e.stopPropagation(); var x = b.dataset.usual;
@@ -288,9 +587,9 @@ function wireUsuals(){
 }
 function whoDot(by){ if (!by) return ''; var c = WHO_COLOR[by] || '#8a9199'; return '<span class="who-dot" style="background:'+c+'">'+esc(by.charAt(0).toUpperCase())+'</span>'; }
 function section(title, items, color, emoji){
-  return '<div class="section" style="--cc:'+color+'">'+(title?'<h2><span class="pill">'+(emoji?emoji+' ':'')+esc(title)+'</span><span class="n">'+items.length+'</span></h2>':'')+'<div class="card">'+items.map(function(r){
+  return '<div class="section" style="--cc:'+color+'">'+(title?'<h2><span class="pill">'+(emoji?em(emoji):'')+esc(title)+'</span><span class="n">'+items.length+'</span></h2>':'')+'<div class="card">'+items.map(function(r){
     var meta = [whoDot(r.by), esc([r.by, r.source==='Web app'?'':r.source].filter(Boolean).join(' '+E(0xb7)+' '))].join('');
-    var ic = r.checked ? (state.sorted ? (CAT_COLOR[r.category]||CAT_COLOR.Other) : listColor(cur)) : '';
+    var ic = r.checked ? tone(state.sorted ? (CAT_COLOR[r.category]||CAT_COLOR.Other) : listColor(cur)) : '';
     return '<div class="item'+(r.checked?' done':'')+'"'+(ic?' style="--cc:'+ic+'"':'')+' data-id="'+esc(r.id)+'"><span class="box"></span><span class="name">'+esc(r.item)+
       (meta?'<span class="meta">'+meta+'</span>':'')+'</span>'+
       '<button class="more" data-more="'+esc(r.id)+'" aria-label="Options">&#x22ef;</button></div>';
@@ -304,7 +603,7 @@ function renderMeals(){
   $('sub').textContent = m.ai ? 'Smart planner on ('+m.ai+')' : 'Simple planner';
   var html = '';
   [0,1].forEach(function(w){
-    html += '<div class="section" style="--cc:'+LIST_COLOR.Meals+'"><h2><span class="pill">'+(w? E(0x1f4c5)+' Next week':E(0x1f4c6)+' This week')+'</span></h2><div class="card">'+m.days.slice(w*7,w*7+7).map(function(d){
+    html += '<div class="section" style="--cc:'+tone(LIST_COLOR.Meals)+'"><h2><span class="pill">'+(w? em(E(0x1f4c5))+'Next week':em(E(0x1f4c6))+'This week')+'</span></h2><div class="card">'+m.days.slice(w*7,w*7+7).map(function(d){
       var p = d.label.split(' ');
       var slots = '';
       if (d.lunch.length) slots += d.lunch.map(function(x){ return slotBtn(d,'Lunch',x.forWho,x.meal); }).join('');
@@ -313,10 +612,10 @@ function renderMeals(){
       return '<div class="day'+(d.today?' today':'')+(d.past?' past':'')+'"><div class="dl">'+esc(p[0])+'<small>'+esc(p[1]+' '+p[2])+'</small></div><div class="dm">'+slots+'</div></div>';
     }).join('')+'</div></div>';
   });
-  html += '<button class="gbtn" id="groc">'+E(0x1f6d2)+' Groceries for these meals</button>';
+  html += '<button class="gbtn" id="groc">'+em(E(0x1f6d2))+'Groceries for these meals</button>';
   html += '<div class="row3"><button id="planNext">Plan next week</button><button id="planThis">Re-plan this week</button></div>';
   var by = {}; m.prefs.forEach(function(x){ (by[x.person]=by[x.person]||[]).push(x); });
-  html += '<div class="section"><h2><span class="pill">'+E(0x1f9d2)+' Likes and no-thank-yous</span></h2>';
+  html += '<div class="section"><h2><span class="pill">'+em(E(0x1f9d2))+'Likes and no-thank-yous</span></h2>';
   var names = Object.keys(by);
   if (!names.length) html += '<div class="hint">Nothing yet. Tap the mic and say "Jaycee doesn\'t like tomatoes".</div>';
   names.forEach(function(n){ html += '<div class="pp">'+esc(n)+'</div><div>'+by[n].map(function(x){
@@ -324,12 +623,12 @@ function renderMeals(){
     return '<span class="pref">'+ic+' '+esc(x.food)+'<button data-unpref="'+esc(n)+'|'+esc(x.food)+'" aria-label="Remove">&#x2715;</button></span>'; }).join('')+'</div>'; });
   html += '</div>';
   /* GL1.10 house rules */
-  html += '<div class="section"><h2><span class="pill">'+E(0x1f4cf)+' House rules</span></h2><div>'+((m.rules||[]).map(function(r){
+  html += '<div class="section"><h2><span class="pill">'+em(E(0x1f4cf))+'House rules</span></h2><div>'+((m.rules||[]).map(function(r){
     return '<span class="pref">'+esc(r)+'<button data-unrule="'+esc(r)+'" aria-label="Remove">&#x2715;</button></span>'; }).join('') ||
     '<div class="hint">None yet. Tap the mic and say "No fajitas on Thursdays" or "Friday is pizza night".</div>')+'</div></div>';
   html += '<div class="hint">'+m.recipes+' recipes. Meals also show on the Family Meals calendar (and Skylight).</div>';
   var ai = m.aiInfo || {choice:'Gemini',using:m.ai||'',claude:false,gemini:false};
-  html += '<div class="section"><h2><span class="pill">'+E(0x2699)+' Smart helper</span></h2><div class="wk">'+['Gemini','Claude'].map(function(p){
+  html += '<div class="section"><h2><span class="pill">'+em(E(0x2699))+'Smart helper</span></h2><div class="wk">'+['Gemini','Claude'].map(function(p){
     return '<button class="chip'+(ai.choice===p?' sel':'')+'" data-ai="'+p+'">'+p+(ai[p.toLowerCase()]?'':' (no key)')+'</button>'; }).join('')+'</div>'+
     '<div class="hint">'+(ai.using ? 'Using '+ai.using+(ai.using!==ai.choice?' ('+ai.choice+' has no key yet)':'')+'. If it fails, the other one is the backup.' : 'No key added yet, so the simple planner runs.')+'</div>'+
     '<div class="wk"><button class="chip" id="addKey">'+E(0x1f511)+' Paste a key</button></div></div>';
@@ -484,6 +783,8 @@ function openSheet(id){
 }
 function closeSheet(){ stopCheck(); $('sheet').classList.remove('open'); $('sbg').classList.remove('open'); }
 $('sbg').onclick = closeSheet;
+$('lookbtn').onclick = openLooks;
+applyLook();
 
 /* First open: ask who this phone belongs to (used for "Added by"). */
 function askWho(){
