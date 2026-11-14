@@ -109,6 +109,10 @@ main{padding:6px 16px 150px;max-width:640px;margin:0 auto}
 .tab .n{display:inline-block;min-width:20px;margin-left:6px;padding:0 6px;border-radius:99px;font-size:12px;line-height:20px;text-align:center;background:color-mix(in srgb, var(--tc) 18%, var(--card));color:var(--ink)}
 .tab.sel .n{background:rgba(255,255,255,.28);color:#fff}
 .tab.new{box-shadow:none;border:2px dashed var(--line);background:none;color:var(--muted)}
+.clear.exp{background:none;border:2px dashed var(--line);color:var(--muted);font-weight:600;font-size:14px;padding:9px 16px}
+.arr{display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid var(--line)}.arr b{flex:1;font-weight:600}
+.arr button{width:40px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:17px}.arr button:disabled{opacity:.3}
+.det a{color:inherit}
 .day{display:flex;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
 .day:first-child{border-top:0}.day.past{opacity:.5}.day.today{background:var(--accent-soft)}
 .dl{flex:none;width:64px;font-weight:800;font-size:14px;line-height:1.3}.dl small{display:block;color:var(--muted);font-weight:600}
@@ -666,10 +670,10 @@ function applyTheme(){
   $('badge').textContent = LK().noEmoji ? cur.charAt(0).toUpperCase() : listEmoji(cur);
 }
 function renderTabs(){
-  var ls = state.lists.length ? state.lists : [{name:'Shopping',emoji:E(0x1f6d2)}];
-  $('tabs').innerHTML = ls.map(function(l){ var n=state.counts[l.name]||0; return '<button class="tab'+(l.name===cur?' sel':'')+'" style="--tc:'+tone(listColor(l.name))+'" data-list="'+esc(l.name)+'">'+(l.emoji?em(l.emoji):'')+esc(l.name)+(n?'<span class="n">'+n+'</span>':'')+'</button>'; }).join('')+
-    '<button class="tab'+(cur===MEALS?' sel':'')+'" style="--tc:'+tone(LIST_COLOR.Meals)+'" data-list="Meals">'+em(E(0x1f37d))+'Meals</button>'+
-    '<button class="tab new" id="newlist">+ New list</button>';
+  var ls = tabOrder((state.lists.length ? state.lists : [{name:'Shopping',emoji:E(0x1f6d2)}]).concat([{name:MEALS, meals:true}]));
+  $('tabs').innerHTML = ls.map(function(l){ if (l.meals) return '<button class="tab'+(cur===MEALS?' sel':'')+'" style="--tc:'+tone(LIST_COLOR.Meals)+'" data-list="Meals">'+em(E(0x1f37d))+'Meals</button>';
+    var n=state.counts[l.name]||0; return '<button class="tab'+(l.name===cur?' sel':'')+'" style="--tc:'+tone(listColor(l.name))+'" data-list="'+esc(l.name)+'">'+(l.emoji?em(l.emoji):'')+esc(l.name)+(n?'<span class="n">'+n+'</span>':'')+'</button>'; }).join('')+
+    '<button class="tab new" id="newlist">+ New list</button><button class="tab new" id="arrange" aria-label="Put the lists in your order">\u21c5 Order</button>';
   var sel=document.querySelector('.tab.sel'); if(sel&&sel.scrollIntoView) sel.scrollIntoView({block:'nearest',inline:'center'});
   $('title').textContent = cur;
   applyTheme();
@@ -695,8 +699,10 @@ function render(){
     var ppl = Object.keys(by).filter(function(w){ return w!=='Anyone'; }).sort(); if (by.Anyone) ppl.push('Anyone');
     html += ppl.map(function(w){ return section(w==='Anyone' ? 'Anyone / not sure' : 'For '+w, by[w], tone(listColor(cur)), E(0x1f381)); }).join('');
   } else { html += open.length ? section('', open, tone(listColor(cur)), '') : ''; }
-  if (done.length){ html += section(state.sorted ? LK().cart : 'Done', done, '#9aa3ab', E(0x2705)) + '<button class="clear" id="clr">'+esc(LK().clear(done.length))+'</button>'; }
+  if (done.length){ html += section(state.sorted ? LK().cart : isGiftList() ? 'Bought' : 'Done', done, '#9aa3ab', E(0x2705)) + '<button class="clear" id="clr">'+esc(LK().clear(done.length))+'</button>'; }
+  html += '<button class="clear exp" id="exp">'+em(E(0x1f4e4))+'Share or export this list</button>';
   $('list').innerHTML = html;
+  $('exp').onclick = exportList;
   wireUsuals(); loadThumbs();
   if ($('clr')) $('clr').onclick = function(){ state.rows = state.rows.filter(function(r){return !r.checked;}); render(); call('apiClearChecked',KEY,cur).then(set).catch(fail); };
 }
@@ -714,7 +720,7 @@ function section(title, items, color, emoji){
   return '<div class="section" style="--cc:'+color+'">'+(title?'<h2><span class="pill">'+(emoji?em(emoji):'')+esc(title)+'</span><span class="n">'+items.length+'</span></h2>':'')+'<div class="card">'+items.map(function(r){
     var meta = [whoDot(r.by), esc([r.by, r.source==='Web app'?'':r.source].filter(Boolean).join(' '+E(0xb7)+' '))].join('');
     var ic = r.checked ? tone(state.sorted ? (CAT_COLOR[r.category]||CAT_COLOR.Other) : listColor(cur)) : '';
-    return '<div class="item'+(r.checked?' done':'')+'"'+(ic?' style="--cc:'+ic+'"':'')+' data-id="'+esc(r.id)+'"><span class="box"></span>'+(r.ph?'<img class="thumb" data-ph="'+esc(r.id)+'" alt="">':'')+'<span class="name">'+esc(r.item)+(r.ph&&r.note?'<span class="det">'+esc(String(r.note).split(' | ')[0].replace(/^Note: /,''))+'</span>':'')+
+    return '<div class="item'+(r.checked?' done':'')+'"'+(ic?' style="--cc:'+ic+'"':'')+' data-id="'+esc(r.id)+'"><span class="box"></span>'+(r.ph?'<img class="thumb" data-ph="'+esc(r.id)+'" alt="">':'')+'<span class="name">'+esc(r.item)+((r.ph||r.source==='Link')&&detOf(r)?'<span class="det">'+esc(detOf(r))+'</span>':'')+
       (meta?'<span class="meta">'+meta+'</span>':'')+'</span>'+
       '<button class="more" data-more="'+esc(r.id)+'" aria-label="Options">&#x22ef;</button></div>';
   }).join('')+'</div></div>';
@@ -868,9 +874,20 @@ function add(text){
   text = (text||'').trim(); if (!text) return;
   $('t').value = '';
   if (cur===MEALS){ toast('Thinking...'); call('apiMealTalk',KEY,text,who||'').then(function(r){ toast(r.msg); setMeals(r.meals); }).catch(fail); return; }
+  var lk = text.match(/https?:\/\/\S+/);
+  if (lk){ addLink(cur, lk[0], text.replace(lk[0],'').trim()); return; }
   toast('Adding...');
   call('apiAdd',KEY,text,who||'',cur).then(function(d){ toast(d.msg); set(d.list); }).catch(fail);
 }
+/* GL1.14: shop links (Amazon or any shop): the server reads the page for name, picture and price. */
+function addLink(list, url, note){
+  toast('Reading the link...');
+  call('apiAddLink',KEY,list,who||'',url,note||'').then(function(d){ toast(d.msg); if (d.list && d.list.list===cur) set(d.list); })
+    .catch(function(e){ toast(navigator.onLine===false ? 'Links need signal. Try again when you have it.' : 'Could not read that link. Try again.'); console.log(e); });
+}
+function linkOf(r){ var m = /Link: (https?:\/\/\S+)/.exec(r && r.note || ''); return m ? m[1] : ''; }
+function detOf(r){ return String(r.note||'').split(' | ').filter(function(x){ return x && !/^Link: /.test(x); })[0] ? String(r.note).split(' | ').filter(function(x){ return x && !/^Link: /.test(x); })[0].replace(/^Note: /,'') : ''; }
+function isGiftList(){ return !state.sorted && (/gift|wish|present|christmas|birthday/i.test(cur) || state.rows.some(function(r){ return r.ph || r.source==='Link'; })); }
 $('f').addEventListener('submit', function(e){ e.preventDefault(); add($('t').value); });
 
 /* Mic: phone speech recognition where the browser allows it; otherwise the keyboard's own mic. */
@@ -894,8 +911,9 @@ function openSheet(id){
   var cats = state.order.length ? state.order : Object.keys(EMOJI);
   $('sheet').innerHTML = '<h3>'+esc(r.item)+'</h3>'+(state.sorted ? '<div class="sub">Pick the right aisle. It will remember next time.</div><div class="chips">'+
     cats.map(function(c){return '<button class="chip'+(c===r.category?' sel':'')+'" style="--cc:'+(CAT_COLOR[c]||CAT_COLOR.Other)+'" data-cat="'+esc(c)+'">'+(EMOJI[c]||E(0x1f6d2))+' '+esc(c)+'</button>';}).join('')+
-    '</div>' : forChips(r))+'<div class="row2"><button id="ren">Rename</button><button class="danger" id="del">Remove</button></div>';
+    '</div>' : forChips(r))+(linkOf(r)?'<div class="row2"><button id="olink">'+em(E(0x1f517))+'Open the shop link</button></div>':'')+'<div class="row2"><button id="ren">Rename</button><button class="danger" id="del">Remove</button></div>';
   $('sheet').classList.add('open'); $('sbg').classList.add('open');
+  if ($('olink')) $('olink').onclick = function(){ window.open(linkOf(r), '_blank', 'noopener'); };
   $('sheet').querySelectorAll('[data-for]').forEach(function(b){ b.onclick = function(){
     r.category = b.dataset.for; closeSheet(); render(); toast(r.category ? 'Moved to '+r.category+'.' : 'Moved to Anyone.');
     call('apiSetFor',KEY,id,r.category,cur).then(set).catch(fail); }; });
@@ -935,11 +953,15 @@ function shrink(file, max, q){ return new Promise(function(ok, no){
     URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', q).split(',')[1]); };
   im.onerror = function(){ URL.revokeObjectURL(url); no(new Error('Could not read that photo.')); };
   im.src = url; }); }
+/* GL1.14: photos are kept in the sheet (up to 6 cells of 45,000 characters), so shrink until it fits. */
+function shrinkFit(f){ var tries = [[1024,0.72],[900,0.62],[760,0.55],[600,0.5],[480,0.45]], i = 0;
+  function next(){ return shrink(f, tries[i][0], tries[i][1]).then(function(b){ return (b.length <= 265000 || ++i >= tries.length) ? b : next(); }); }
+  return next(); }
 $('cam').onclick = function(){ $('camf').value = ''; $('camf').click(); };
 $('camf').onchange = function(){
   var f = $('camf').files && $('camf').files[0]; if (!f) return;
   toast('Getting the photo ready...');
-  Promise.all([shrink(f, 1280, 0.8), shrink(f, 240, 0.7)]).then(function(p){ photoNote(p[0], p[1]); }).catch(function(e){ toast(e.message); });
+  Promise.all([shrinkFit(f), shrink(f, 240, 0.7)]).then(function(p){ photoNote(p[0], p[1]); }).catch(function(e){ toast(e.message); });
 };
 function photoNote(full, thumb){
   var list = cur;
@@ -966,10 +988,88 @@ function shrinkSrc(img, b64){ if (img) img.src = 'data:image/jpeg;base64,'+b64; 
 $('list').addEventListener('click', function(e){
   var t = e.target.closest('[data-ph]'); if (!t) return; e.stopPropagation(); e.preventDefault();
   var r = state.rows.filter(function(x){ return x.id===t.dataset.ph; })[0] || {item:''};
-  $('sheet').innerHTML = '<h3>'+esc(r.item)+'</h3>'+(r.note?'<div class="sub">'+esc(r.note)+'</div>':'')+'<img class="phbig" id="phbig" src="'+t.src+'" alt="">';
+  var nt = String(r.note||'').split(' | ').filter(function(x){ return x && !/^Link: /.test(x); }).join(' | ');
+  $('sheet').innerHTML = '<h3>'+esc(r.item)+'</h3>'+(nt?'<div class="sub">'+esc(nt)+'</div>':'')+'<img class="phbig" id="phbig" src="'+t.src+'" alt="">'+
+    (linkOf(r)?'<div class="row2"><button id="olink2">'+em(E(0x1f517))+'Open the shop link</button></div>':'');
+  if ($('olink2')) $('olink2').onclick = function(){ window.open(linkOf(r), '_blank', 'noopener'); };
   $('sheet').classList.add('open'); $('sbg').classList.add('open');
   call('apiPhoto',KEY,t.dataset.ph).then(function(d){ var b = $('phbig'); if (b && d && d.data) b.src = 'data:image/jpeg;base64,'+d.data; }).catch(function(){});
 }, true);
+/* GL1.14: lists in your own order (saved on this phone). */
+function tabOrder(ls){ var o = []; try { o = JSON.parse(localStorage.getItem('gl_order')||'[]'); } catch(e) {}
+  return ls.map(function(l,i){ var k = o.indexOf(l.name); return {l:l, k: k<0 ? 1000+i : k}; }).sort(function(a,b){ return a.k-b.k; }).map(function(x){ return x.l; }); }
+function openArrange(){
+  var names = tabOrder((state.lists.length ? state.lists : [{name:'Shopping'}]).concat([{name:MEALS}])).map(function(l){ return l.name; });
+  function draw(){
+    $('sheet').innerHTML = '<h3>Your list order</h3><div class="sub">Saved on this phone.</div>'+names.map(function(n,i){
+      return '<div class="arr"><b>'+esc(n)+'</b><button data-up="'+i+'"'+(i?'':' disabled')+' aria-label="Move up">\u2191</button><button data-dn="'+i+'"'+(i<names.length-1?'':' disabled')+' aria-label="Move down">\u2193</button></div>'; }).join('')+
+      '<button class="gbtn" id="arrdone">Done</button>';
+    $('sheet').querySelectorAll('[data-up],[data-dn]').forEach(function(b){ b.onclick = function(){
+      var i = +(b.dataset.up!==undefined ? b.dataset.up : b.dataset.dn), j = b.dataset.up!==undefined ? i-1 : i+1, t = names[i]; names[i] = names[j]; names[j] = t;
+      try { localStorage.setItem('gl_order', JSON.stringify(names)); } catch(e) {} draw(); renderTabs(); }; });
+    $('arrdone').onclick = closeSheet;
+  }
+  draw(); $('sheet').classList.add('open'); $('sbg').classList.add('open');
+}
+$('tabs').addEventListener('click', function(e){ if (e.target.closest('#arrange')) openArrange(); });
+
+/* GL1.14: share or export a list (text, spreadsheet file, email). */
+function exportRows(){
+  var rows = state.rows.slice(), gift = isGiftList();
+  return rows.map(function(r){ var parts = String(r.note||'').split(' | ').filter(Boolean);
+    return { item:r.item, group: state.sorted ? (r.category||'Other') : (r.category && r.category!=='Other' ? r.category : 'Anyone'),
+      done:r.checked, status: r.checked ? (state.sorted ? 'In the cart' : gift ? 'Bought' : 'Done') : (state.sorted || gift ? 'To buy' : 'Open'),
+      details: parts.filter(function(x){ return !/^(Note|Link): /.test(x); }).join('; '), note: parts.filter(function(x){ return /^Note: /.test(x); }).map(function(x){ return x.slice(6); }).join('; '),
+      link: linkOf(r), by:r.by, at:r.at }; });
+}
+function exportText(){
+  var rows = exportRows(), out = [cur], groups = [], by = {};
+  rows.filter(function(r){ return !r.done; }).forEach(function(r){ if (!by[r.group]){ by[r.group] = []; groups.push(r.group); } by[r.group].push(r); });
+  function line(r){ return (r.done ? '\u2713 ' : '- ')+r.item+(r.details ? ' ('+r.details+')' : '')+(r.note && r.note!==r.details ? ' - '+r.note : '')+(r.link ? ' '+r.link : ''); }
+  if (state.sorted) groups.sort(function(a,b){ var i = state.order.indexOf(a), j = state.order.indexOf(b); return (i<0?999:i)-(j<0?999:j); });
+  else groups.sort(function(a,b){ return a==='Anyone' ? 1 : b==='Anyone' ? -1 : a<b ? -1 : a>b ? 1 : 0; });
+  groups.forEach(function(g){ out.push(''); out.push(state.sorted ? g : (g==='Anyone' ? 'Anyone' : 'For '+g)); by[g].forEach(function(r){ out.push(line(r)); }); });
+  var done = rows.filter(function(r){ return r.done; });
+  if (done.length){ out.push(''); out.push(done[0].status); done.forEach(function(r){ out.push(line(r)+(state.sorted ? '' : ' ['+(r.group==='Anyone'?'Anyone':'for '+r.group)+']')); }); }
+  return out.join('\n');
+}
+function exportCsv(){
+  function q(x){ x = String(x==null?'':x); return /[",\n]/.test(x) ? '"'+x.replace(/"/g,'""')+'"' : x; }
+  var head = ['List','Item', state.sorted ? 'Aisle' : 'For','Status','Details','Note','Link','Added by','Added'];
+  return [head].concat(exportRows().map(function(r){ return [cur, r.item, r.group, r.status, r.details, r.note, r.link, r.by, r.at]; })).map(function(a){ return a.map(q).join(','); }).join('\r\n');
+}
+function exportList(){
+  if (!state.rows.length){ toast('Nothing on this list yet.'); return; }
+  ask({title:'Share or export '+cur, buttons:[{label:'Share or copy as text', value:'text', kind:'main'},{label:'Spreadsheet file (opens in Sheets or Excel)', value:'csv'},{label:'Email it', value:'mail'}]}).then(function(v){
+    if (!v) return;
+    var txt = exportText(), name = cur.replace(/[^A-Za-z0-9 ]/g,'').trim().replace(/ +/g,'-')+'-'+new Date().toISOString().slice(0,10);
+    if (v==='mail'){ location.href = 'mailto:?subject='+encodeURIComponent(cur)+'&body='+encodeURIComponent(txt); return; }
+    if (v==='text'){
+      if (navigator.share) return navigator.share({title:cur, text:txt}).catch(function(){});
+      if (navigator.clipboard) return navigator.clipboard.writeText(txt).then(function(){ toast('Copied. Paste it anywhere.'); }, function(){ toast('Could not copy here.'); });
+      return toast('Sharing is not available here.');
+    }
+    var file = new Blob(['\ufeff'+exportCsv()], {type:'text/csv'});
+    try { var ff = new File([file], name+'.csv', {type:'text/csv'});
+      if (navigator.canShare && navigator.canShare({files:[ff]})) return navigator.share({files:[ff], title:cur}).catch(function(){}); } catch(e) {}
+    var a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name+'.csv'; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500); toast('Saved '+name+'.csv');
+  });
+}
+
+/* GL1.14: a link shared into the app (Android: Share > Our Lists) lands on a gift list. */
+function sharedLink(){
+  var sp; try { sp = new URLSearchParams(location.search); } catch(e) { return; }
+  var url = sp.get('url') || ((sp.get('text')||'').match(/https?:\/\/\S+/)||[])[0] || ((sp.get('title')||'').match(/https?:\/\/\S+/)||[])[0];
+  if (!url) return;
+  if (history.replaceState) history.replaceState(null, '', location.pathname + location.hash);
+  var names = (state.lists||[]).map(function(l){ return l.name; });
+  var list = (cur!==MEALS && !state.sorted) ? cur : (names.filter(function(n){ return /gift/i.test(n); })[0] || 'Gift Ideas');
+  ask({title:'Add this to '+list+'?', text:url, input:true, placeholder:'Who is it for? (optional)', ok:'Add'}).then(function(v){
+    if (v===null || v===undefined) return;
+    if (cur!==list) go(list);
+    addLink(list, url, v); });
+}
 $('lookbtn').onclick = openLooks;
 applyLook();
 
@@ -982,6 +1082,7 @@ function askWho(){
 }
 
 if (!window.GL_NOKEY) { applyTheme(); load(); if (!who) askWho(); }
+setTimeout(function(){ if (!window.GL_NOKEY && KEY) sharedLink(); }, 900);
 setInterval(function(){ if (!window.GL_NOKEY && !document.hidden && !rec && !gListen && !$('dlgbg').classList.contains('open')) load(); }, 20000);
 document.addEventListener('visibilitychange', function(){ if (!window.GL_NOKEY && !document.hidden) load(); });
 </script>
