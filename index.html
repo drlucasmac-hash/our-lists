@@ -424,11 +424,28 @@ html[data-look="midnight"][data-style="charcoal"]{--bg:#111111;--card:#191919;--
 html[data-look="notebook"] .thumb{border-radius:2px;border:4px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.18);transform:rotate(-2deg)}
 html[data-look="ledger"] .thumb{border-radius:0;border:2px solid #0b0b0b}
 html[data-look="midnight"] .thumb{border-radius:2px;border:1px solid var(--line2)}
+/* GL1.15: Style button, chat, private list, tour */
+.top .lookbtn.pretty{background:linear-gradient(135deg,#ff7a1a,#ff4d8d 55%,#7a5cff);color:#fff;border-radius:999px;padding:9px 15px 9px 12px;font-size:14px;font-weight:800;letter-spacing:.2px;box-shadow:0 4px 14px rgba(255,77,141,.35);border:2px solid rgba(255,255,255,.7);font-style:normal;transform:rotate(-2deg)}
+.top .lookbtn.pretty .em{margin-right:5px}
+.tab .dot{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#e0457b;color:#fff;font-size:11px;font-weight:800;margin-left:6px;padding:0 5px;text-align:center}
+.chat{display:flex;flex-direction:column;gap:8px;padding:4px 2px 10px}
+.msg{max-width:80%;padding:9px 13px;border-radius:16px;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:15.5px;line-height:1.35;word-wrap:break-word}
+.msg.me{align-self:flex-end;background:var(--accent-soft)}
+.msg small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
+.chatbar{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+.chatbar button{border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:14px;padding:8px 13px;border-radius:999px}
+.privnote{font-size:12.5px;color:var(--muted);margin:2px 4px 10px}
+.tour-bg{position:fixed;inset:0;background:rgba(10,12,20,.45);z-index:80;display:flex;align-items:flex-end;justify-content:center;padding:16px}
+.tour{background:var(--card,#fff);color:var(--ink,#222);border-radius:20px;max-width:420px;width:100%;padding:20px 20px 16px;box-shadow:0 10px 40px rgba(0,0,0,.3);margin-bottom:84px}
+.tour h4{margin:0 0 6px;font-size:20px}.tour p{margin:0 0 14px;font-size:15.5px;line-height:1.4}
+.tour .row{display:flex;align-items:center;gap:8px}.tour .dots{flex:1;display:flex;gap:5px}.tour .dots i{width:7px;height:7px;border-radius:4px;background:var(--line,#ddd)}.tour .dots i.on{background:var(--accent,#ff7a1a);width:18px}
+.tour button{border:0;font:inherit;font-weight:800;font-size:15px;padding:10px 16px;border-radius:999px;background:var(--accent,#ff7a1a);color:var(--accent-ink,#fff)}.tour button.skip{background:none;color:var(--muted,#888);font-weight:600}
+.tour-hi{position:relative;z-index:81;box-shadow:0 0 0 4px #fff,0 0 0 8px #ff7a1a !important;border-radius:14px}
 </style>
 </head>
 <body>
 <div class="top">
-  <header><div class="badge" id="badge"></div><div class="htxt"><div class="brand" id="brand"></div><h1 id="title">Shopping</h1><div class="sub" id="sub">Loading&#x2026;</div></div><button class="lookbtn" id="lookbtn" aria-label="Change the look">Aa</button></header>
+  <header><div class="badge" id="badge"></div><div class="htxt"><div class="brand" id="brand"></div><h1 id="title">Shopping</h1><div class="sub" id="sub">Loading&#x2026;</div></div><button class="lookbtn pretty" id="lookbtn" aria-label="Change the style"><span class="em">&#x1F3A8;</span>Style</button></header>
   <div class="prog" id="prog"><div class="track"><div class="fill" id="pfill" style="width:0"></div></div></div>
   <nav class="tabs" id="tabs"></nav>
 </div>
@@ -476,11 +493,11 @@ var EMOJI = {"Produce":E(0x1f96c),"Bakery":E(0x1f956),"Deli":E(0x1f96a),"Meat & 
 var CAT_COLOR = {"Produce":"#38a85a","Bakery":"#d98a2b","Deli":"#e2694b","Meat & Seafood":"#d94a5f","Dairy & Eggs":"#3d8fe0","Frozen":"#1fb3d1","Pasta, Rice & Grains":"#c79a1c",
   "Canned & Jarred":"#b8693a","Baking & Spices":"#a8703f","Condiments":"#e0a02a","Breakfast & Cereal":"#ec7f2d","Snacks":"#e5508f","Drinks":"#5b74e6","Household":"#7c64e0",
   "Personal Care":"#bb5bd6","Baby & Kids":"#ef7fae","Pet":"#8c785f","Hardware & Garden":"#5f7a8f","Other":"#8a9199"};
-var LIST_COLOR = {"Shopping":"#2f9e6e","Gift Ideas":"#e0457b","Notes":"#e09b00","Meals":"#f0652f"};
+var LIST_COLOR = {"Shopping":"#2f9e6e","Gift Ideas":"#e0457b","Notes":"#e09b00","Meals":"#f0652f","Chat":"#3d7be0","Just me":"#6b5bd6"};
 var EXTRA_COLORS = ["#4f7cff","#8b5cf6","#14a7a0","#e05a9b","#3fa34d"];
 var WHO_COLOR = {"Lucas":"#3d8fe0","Brittany":"#a24fe0"};
 var state = {rows:[], order:[], lists:[], counts:{}, sorted:true, list:'Shopping', usuals:[]};
-var meals = null; var MEALS = 'Meals';
+var meals = null; var MEALS = 'Meals'; var CHAT = 'Chat'; var PRIV = 'Just me'; var chatData = null;
 var cur = 'Shopping'; try { cur = localStorage.getItem('gl_list') || 'Shopping'; } catch(e) {}
 var who = null; try { who = localStorage.getItem('gl_who'); } catch(e) {}
 var $ = function(id){ return document.getElementById(id); };
@@ -670,24 +687,28 @@ function applyTheme(){
   $('badge').textContent = LK().noEmoji ? cur.charAt(0).toUpperCase() : listEmoji(cur);
 }
 function renderTabs(){
-  var ls = tabOrder((state.lists.length ? state.lists : [{name:'Shopping',emoji:E(0x1f6d2)}]).concat([{name:MEALS, meals:true}]));
+  var ls = tabOrder((state.lists.length ? state.lists : [{name:'Shopping',emoji:E(0x1f6d2)}]).concat([{name:MEALS, meals:true},{name:CHAT, emoji:E(0x1f4ac)},{name:PRIV, emoji:E(0x1f512)}]));
   $('tabs').innerHTML = ls.map(function(l){ if (l.meals) return '<button class="tab'+(cur===MEALS?' sel':'')+'" style="--tc:'+tone(LIST_COLOR.Meals)+'" data-list="Meals">'+em(E(0x1f37d))+'Meals</button>';
-    var n=state.counts[l.name]||0; return '<button class="tab'+(l.name===cur?' sel':'')+'" style="--tc:'+tone(listColor(l.name))+'" data-list="'+esc(l.name)+'">'+(l.emoji?em(l.emoji):'')+esc(l.name)+(n?'<span class="n">'+n+'</span>':'')+'</button>'; }).join('')+
+    if (l.name===CHAT){ var un = chatUnread(); return '<button class="tab'+(cur===CHAT?' sel':'')+'" style="--tc:'+tone(LIST_COLOR.Chat)+'" data-list="'+CHAT+'">'+em(l.emoji)+'Chat'+(un?'<span class="dot">'+un+'</span>':'')+'</button>'; }
+    var n = l.name===PRIV ? privLoad().filter(function(r){ return !r.checked; }).length : (state.counts[l.name]||0); return '<button class="tab'+(l.name===cur?' sel':'')+'" style="--tc:'+tone(listColor(l.name))+'" data-list="'+esc(l.name)+'">'+(l.emoji?em(l.emoji):'')+esc(l.name)+(n?'<span class="n">'+n+'</span>':'')+'</button>'; }).join('')+
     '<button class="tab new" id="newlist">+ New list</button><button class="tab new" id="arrange" aria-label="Put the lists in your order">\u21c5 Order</button>';
   var sel=document.querySelector('.tab.sel'); if(sel&&sel.scrollIntoView) sel.scrollIntoView({block:'nearest',inline:'center'});
   $('title').textContent = cur;
   applyTheme();
-  $('t').placeholder = cur===MEALS ? LK().phMeals : state.sorted ? LK().ph : LK().phNote;
-  $('cam').classList.toggle('on', cur!==MEALS && !state.sorted);
+  $('t').placeholder = cur===MEALS ? LK().phMeals : cur===CHAT ? 'Message '+(who==='Brittany'?'Lucas':who==='Lucas'?'Brittany':'the family')+'...' : state.sorted ? LK().ph : LK().phNote;
+  $('cam').classList.toggle('on', cur!==MEALS && cur!==CHAT && !state.sorted);
 }
 function render(){
   renderTabs();
   if (cur===MEALS){ $('prog').classList.remove('on'); renderMeals(); return; }
+  if (cur===CHAT){ $('prog').classList.remove('on'); renderChat(); return; }
   var rows = state.rows, open = rows.filter(function(r){return !r.checked;}), done = rows.filter(function(r){return r.checked;});
   $('sub').textContent = !rows.length ? 'Nothing here yet' : open.length ? LK().sub(open.length, state.sorted ? done.length : 0) : LK().allDone;
   $('prog').classList.toggle('on', state.sorted && rows.length > 0);
   $('pfill').style.width = rows.length ? Math.round(100*done.length/rows.length)+'%' : '0';
   var html = usualsHtml();
+  if (cur===PRIV){ $('sub').textContent = (open.length ? open.length+' here. ' : '')+'Only on this phone.'; html += '<div class="privnote">'+em(E(0x1f512))+'Private to this phone: not shared, not in the family sheet, not backed up. Use "Share or export" now and then to keep a copy.</div>'; }
+  if (!state.sorted){ var pins = open.filter(isPinned); if (pins.length){ html += section('Pinned', pins, tone(listColor(cur)), E(0x1f4cc)); open = open.filter(function(r){ return !isPinned(r); }); } }
   if (!rows.length){ $('list').innerHTML = html + '<div class="empty"><b>'+(LK().noEmoji ? esc(LK().mark||'') : state.sorted?E(0x1f9fa):listEmoji(cur))+'</b>'+LK().empty(cur)+'</div>'; wireUsuals(); return; }
   if (state.sorted){
     var groups = {}; open.forEach(function(r){ (groups[r.category]=groups[r.category]||[]).push(r); });
@@ -720,13 +741,13 @@ function section(title, items, color, emoji){
   return '<div class="section" style="--cc:'+color+'">'+(title?'<h2><span class="pill">'+(emoji?em(emoji):'')+esc(title)+'</span><span class="n">'+items.length+'</span></h2>':'')+'<div class="card">'+items.map(function(r){
     var meta = [whoDot(r.by), esc([r.by, r.source==='Web app'?'':r.source].filter(Boolean).join(' '+E(0xb7)+' '))].join('');
     var ic = r.checked ? tone(state.sorted ? (CAT_COLOR[r.category]||CAT_COLOR.Other) : listColor(cur)) : '';
-    return '<div class="item'+(r.checked?' done':'')+'"'+(ic?' style="--cc:'+ic+'"':'')+' data-id="'+esc(r.id)+'"><span class="box"></span>'+(r.ph?'<img class="thumb" data-ph="'+esc(r.id)+'" alt="">':'')+'<span class="name">'+esc(r.item)+((r.ph||r.source==='Link')&&detOf(r)?'<span class="det">'+esc(detOf(r))+'</span>':'')+
+    return '<div class="item'+(r.checked?' done':'')+'"'+(ic?' style="--cc:'+ic+'"':'')+' data-id="'+esc(r.id)+'"><span class="box"></span>'+(r.ph?'<img class="thumb" data-ph="'+esc(r.id)+'" alt="">':'')+'<span class="name">'+esc(r.item)+((r.ph||r.source==='Link'||cur===PRIV)&&detOf(r)?'<span class="det">'+esc(detOf(r))+'</span>':'')+
       (meta?'<span class="meta">'+meta+'</span>':'')+'</span>'+
       '<button class="more" data-more="'+esc(r.id)+'" aria-label="Options">&#x22ef;</button></div>';
   }).join('')+'</div></div>';
 }
 function set(d){ if (d.list !== cur) return; state = d; render(); }
-function load(){ if (cur===MEALS) return call('apiMeals',KEY).then(setMeals).catch(fail); return call('apiGetList',KEY,cur).then(set).catch(fail); }
+function load(){ if (cur===MEALS) return call('apiMeals',KEY).then(setMeals).catch(fail); if (cur===CHAT) return call('apiChat',KEY).then(setChat).catch(fail); return call('apiGetList',KEY,cur).then(set).catch(fail); }
 function setMeals(m){ if (cur!==MEALS) return; meals = m; if (m.lists) state.lists = m.lists; render(); }
 function renderMeals(){
   var m = meals; if (!m){ $('sub').textContent='Loading...'; $('list').innerHTML=''; return; }
@@ -758,11 +779,13 @@ function renderMeals(){
     '<div class="hint">None yet. Tap the mic and say "No fajitas on Thursdays" or "Friday is pizza night".</div>')+'</div></div>';
   html += '<div class="hint">'+m.recipes+' recipes. Meals also show on the Family Meals calendar (and Skylight).</div>';
   var ai = m.aiInfo || {choice:'Gemini',using:m.ai||'',claude:false,gemini:false};
-  html += '<div class="section"><h2><span class="pill">'+em(E(0x2699))+'Smart helper</span></h2><div class="wk">'+['Gemini','Claude'].map(function(p){
+  if (who==='Lucas') html += '<div class="section"><h2><span class="pill">'+em(E(0x2699))+'Smart helper</span></h2><div class="wk">'+['Gemini','Claude'].map(function(p){
     return '<button class="chip'+(ai.choice===p?' sel':'')+'" data-ai="'+p+'">'+p+(ai[p.toLowerCase()]?'':' (no key)')+'</button>'; }).join('')+'</div>'+
     '<div class="hint">'+(ai.using ? 'Using '+ai.using+(ai.using!==ai.choice?' ('+ai.choice+' has no key yet)':'')+'. If it fails, the other one is the backup.' : 'No key added yet, so the simple planner runs.')+'</div>'+
     '<div class="wk"><button class="chip" id="addKey">'+E(0x1f511)+' Paste a key</button></div></div>';
   $('list').innerHTML = html;
+  if (!$('addKey')) { $('groc').onclick = function(){ var dw = new Date().getDay(); openGroceries(dw===0||dw===6 ? 'next' : 'this'); }; $('planNext').onclick = function(){ planWeek('next'); };
+    $('planThis').onclick = function(){ ask({title:'Re-plan the rest of this week?', text:'Meals you set by hand stay.', ok:'Re-plan'}).then(function(v){ if (v) planWeek('this'); }); }; return; }
   $('groc').onclick = function(){ var dw = new Date().getDay(); openGroceries(dw===0||dw===6 ? 'next' : 'this'); };
   $('planNext').onclick = function(){ planWeek('next'); };
   $('list').querySelectorAll('[data-ai]').forEach(function(b){ b.onclick = function(){ if (b.classList.contains('sel')) return;
@@ -874,6 +897,7 @@ function add(text){
   text = (text||'').trim(); if (!text) return;
   $('t').value = '';
   if (cur===MEALS){ toast('Thinking...'); call('apiMealTalk',KEY,text,who||'').then(function(r){ toast(r.msg); setMeals(r.meals); }).catch(fail); return; }
+  if (cur===CHAT){ if (chatData) { chatData.msgs.push({n:0, who:who||'', text:text, at:'sending...'}); renderChat(); } call('apiChatSend',KEY,who||'',text).then(setChat).catch(fail); return; }
   var lk = text.match(/https?:\/\/\S+/);
   if (lk){ addLink(cur, lk[0], text.replace(lk[0],'').trim()); return; }
   toast('Adding...');
@@ -886,7 +910,8 @@ function addLink(list, url, note){
     .catch(function(e){ toast(navigator.onLine===false ? 'Links need signal. Try again when you have it.' : 'Could not read that link. Try again.'); console.log(e); });
 }
 function linkOf(r){ var m = /Link: (https?:\/\/\S+)/.exec(r && r.note || ''); return m ? m[1] : ''; }
-function detOf(r){ return String(r.note||'').split(' | ').filter(function(x){ return x && !/^Link: /.test(x); })[0] ? String(r.note).split(' | ').filter(function(x){ return x && !/^Link: /.test(x); })[0].replace(/^Note: /,'') : ''; }
+function detOf(r){ var d = String(r.note||'').split(' | ').filter(function(x){ return x && x!=='Pinned' && !/^Link: /.test(x); })[0]; return d ? d.replace(/^Note: /,'') : ''; }
+function isPinned(r){ return /^Pinned( \||$)/.test(String(r.note||'')); }
 function isGiftList(){ return !state.sorted && (/gift|wish|present|christmas|birthday/i.test(cur) || state.rows.some(function(r){ return r.ph || r.source==='Link'; })); }
 $('f').addEventListener('submit', function(e){ e.preventDefault(); add($('t').value); });
 
@@ -911,9 +936,10 @@ function openSheet(id){
   var cats = state.order.length ? state.order : Object.keys(EMOJI);
   $('sheet').innerHTML = '<h3>'+esc(r.item)+'</h3>'+(state.sorted ? '<div class="sub">Pick the right aisle. It will remember next time.</div><div class="chips">'+
     cats.map(function(c){return '<button class="chip'+(c===r.category?' sel':'')+'" style="--cc:'+(CAT_COLOR[c]||CAT_COLOR.Other)+'" data-cat="'+esc(c)+'">'+(EMOJI[c]||E(0x1f6d2))+' '+esc(c)+'</button>';}).join('')+
-    '</div>' : forChips(r))+(linkOf(r)?'<div class="row2"><button id="olink">'+em(E(0x1f517))+'Open the shop link</button></div>':'')+'<div class="row2"><button id="ren">Rename</button><button class="danger" id="del">Remove</button></div>';
+    '</div>' : forChips(r))+(!state.sorted?'<div class="row2"><button id="pin">'+em(E(0x1f4cc))+(isPinned(r)?'Unpin':'Pin to the top')+'</button></div>':'')+(linkOf(r)?'<div class="row2"><button id="olink">'+em(E(0x1f517))+'Open the shop link</button></div>':'')+'<div class="row2"><button id="ren">Rename</button><button class="danger" id="del">Remove</button></div>';
   $('sheet').classList.add('open'); $('sbg').classList.add('open');
   if ($('olink')) $('olink').onclick = function(){ window.open(linkOf(r), '_blank', 'noopener'); };
+  if ($('pin')) $('pin').onclick = function(){ var on = !isPinned(r); closeSheet(); toast(on ? 'Pinned to the top.' : 'Unpinned.'); call('apiSetPin',KEY,id,on,cur).then(set).catch(fail); };
   $('sheet').querySelectorAll('[data-for]').forEach(function(b){ b.onclick = function(){
     r.category = b.dataset.for; closeSheet(); render(); toast(r.category ? 'Moved to '+r.category+'.' : 'Moved to Anyone.');
     call('apiSetFor',KEY,id,r.category,cur).then(set).catch(fail); }; });
@@ -999,7 +1025,7 @@ $('list').addEventListener('click', function(e){
 function tabOrder(ls){ var o = []; try { o = JSON.parse(localStorage.getItem('gl_order')||'[]'); } catch(e) {}
   return ls.map(function(l,i){ var k = o.indexOf(l.name); return {l:l, k: k<0 ? 1000+i : k}; }).sort(function(a,b){ return a.k-b.k; }).map(function(x){ return x.l; }); }
 function openArrange(){
-  var names = tabOrder((state.lists.length ? state.lists : [{name:'Shopping'}]).concat([{name:MEALS}])).map(function(l){ return l.name; });
+  var names = tabOrder((state.lists.length ? state.lists : [{name:'Shopping'}]).concat([{name:MEALS},{name:CHAT},{name:PRIV}])).map(function(l){ return l.name; });
   function draw(){
     $('sheet').innerHTML = '<h3>Your list order</h3><div class="sub">Saved on this phone.</div>'+names.map(function(n,i){
       return '<div class="arr"><b>'+esc(n)+'</b><button data-up="'+i+'"'+(i?'':' disabled')+' aria-label="Move up">\u2191</button><button data-dn="'+i+'"'+(i<names.length-1?'':' disabled')+' aria-label="Move down">\u2193</button></div>'; }).join('')+
@@ -1019,7 +1045,7 @@ function exportRows(){
   return rows.map(function(r){ var parts = String(r.note||'').split(' | ').filter(Boolean);
     return { item:r.item, group: state.sorted ? (r.category||'Other') : (r.category && r.category!=='Other' ? r.category : 'Anyone'),
       done:r.checked, status: r.checked ? (state.sorted ? 'In the cart' : gift ? 'Bought' : 'Done') : (state.sorted || gift ? 'To buy' : 'Open'),
-      details: parts.filter(function(x){ return !/^(Note|Link): /.test(x); }).join('; '), note: parts.filter(function(x){ return /^Note: /.test(x); }).map(function(x){ return x.slice(6); }).join('; '),
+      details: parts.filter(function(x){ return x!=='Pinned' && !/^(Note|Link): /.test(x); }).join('; '), note: parts.filter(function(x){ return /^Note: /.test(x); }).map(function(x){ return x.slice(6); }).join('; '),
       link: linkOf(r), by:r.by, at:r.at }; });
 }
 function exportText(){
@@ -1070,6 +1096,96 @@ function sharedLink(){
     if (cur!==list) go(list);
     addLink(list, url, v); });
 }
+/* ---- GL1.15 chat ---- */
+function chatSeen(){ try { return +(localStorage.getItem('gl_chat_seen')||0); } catch(e) { return 0; } }
+function chatUnread(){ var c = state.chat || {}; if (!c.n || cur===CHAT) return 0; if (c.who && c.who===who) return 0; var d = c.n - Math.max(chatSeen(), 1); return d > 0 ? (d > 9 ? '9+' : d) : 0; }
+function setChat(d){ if (cur!==CHAT || !d) return; chatData = d; state.chat = {n:d.n, who:(d.msgs[d.msgs.length-1]||{}).who}; try { localStorage.setItem('gl_chat_seen', String(d.n)); } catch(e) {} render(); }
+function renderChat(){
+  var d = chatData; $('sub').textContent = 'Quick notes about shopping and meals';
+  if (!d){ $('list').innerHTML = '<div class="empty">Loading...</div>'; return; }
+  var html = '<div class="chatbar"><button id="store">'+em(E(0x1f6d2))+"I'm at the store</button><button id=\"alerts\">"+em(E(0x2709))+'Email alerts</button></div><div class="chat">';
+  html += d.msgs.length ? d.msgs.map(function(m){ return '<div class="msg'+(m.who===who?' me':'')+'">'+esc(m.text)+'<small>'+esc((m.who===who?'You':m.who)+' '+E(0xb7)+' '+m.at)+'</small></div>'; }).join('')
+    : '<div class="empty">No messages yet. Say hi, or tap "I\'m at the store" so the other person can add things.</div>';
+  $('list').innerHTML = html + '</div>';
+  $('store').onclick = function(){ toast('Telling the family...'); call('apiStoreTrip',KEY,who||'').then(function(r){ setChat(r); toast('Sent. They will get an email if alerts are on.'); }).catch(fail); };
+  $('alerts').onclick = openAlerts;
+  var last = $('list').querySelector('.msg:last-child'); if (last && last.scrollIntoView) last.scrollIntoView({block:'end'});
+}
+function openAlerts(){
+  if (!who){ askWho(); return; }
+  call('apiNotifyInfo',KEY,who).then(function(info){
+    $('sheet').innerHTML = '<h3>Email alerts for '+esc(who)+'</h3><div class="sub">Chat and "at the store" come right away. Shopping items the other person adds and meal changes come together, at most every 15 minutes. Gifts, notes and private lists are never sent.</div>'+
+      '<div class="phrow"><input id="aem" type="email" placeholder="Your email" value="'+esc(info.email||'')+'"></div>'+
+      '<div class="row2"><button id="aon" class="'+(info.on?'':'gbtn')+'">'+(info.on?'Save email':'Turn on')+'</button>'+(info.on?'<button class="danger" id="aoff">Turn off</button>':'')+'</div>'+
+      (info.on?'<div class="row2"><button id="atest">Send a test email</button></div>':'')+'<div class="hint">Status: '+(info.on?'on':'off')+'</div>';
+    $('sheet').classList.add('open'); $('sbg').classList.add('open');
+    $('aon').onclick = function(){ call('apiNotifySet',KEY,who,true,$('aem').value).then(function(){ closeSheet(); toast('Email alerts on.'); }).catch(function(e){ toast(String(e && e.message || 'Could not save.').replace(/^Error: /,'')); }); };
+    if ($('aoff')) $('aoff').onclick = function(){ call('apiNotifySet',KEY,who,false,'').then(function(){ closeSheet(); toast('Email alerts off.'); }).catch(fail); };
+    if ($('atest')) $('atest').onclick = function(){ call('apiNotifyTest',KEY,who).then(function(r){ toast(r.msg); }).catch(fail); };
+  }).catch(fail);
+}
+
+/* ---- GL1.15 private list: lives only on this phone (localStorage). Links and photos are read by the
+   server and answered back without being saved or logged. ---- */
+var PRIV_FNS = {apiGetList:1, apiAdd:1, apiToggle:1, apiRename:1, apiDelete:1, apiClearChecked:1, apiSetFor:1, apiSetPin:1, apiAddLink:1, apiAddPhoto:1, apiPhoto:1, apiPhotoThumbs:1, apiSetCategory:1};
+function privLoad(){ try { return JSON.parse(localStorage.getItem('gl_priv')||'[]'); } catch(e) { return []; } }
+function privSave(rows){ try { localStorage.setItem('gl_priv', JSON.stringify(rows)); return true; } catch(e) { toast('This phone is out of room for private items.'); return false; } }
+function privPeople(){ var p = state.people && state.people.length ? state.people : null; try { if (p) localStorage.setItem('gl_people', JSON.stringify(p)); else p = JSON.parse(localStorage.getItem('gl_people')||'null'); } catch(e) {} return p || ['Lucas','Brittany','Chloe','Lexi','Jaycee']; }
+function privState(){ var rows = privLoad(); rows.sort(function(a,b){ return (a.checked===b.checked) ? 0 : (a.checked ? 1 : -1); });
+  return {list:PRIV, sorted:false, lists:state.lists, counts:state.counts, rows:rows, order:[], usuals:[], people:privPeople(), chat:state.chat}; }
+function privWho(text){ var t = String(text||'').toLowerCase(); return privPeople().filter(function(n){ return new RegExp('\\b'+n.toLowerCase()+'\\b').test(t); })[0] || ''; }
+function privNew(o){ var rows = privLoad(), r = {id:'pv'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), item:o.item, category:o.category||'', by:who||'', source:o.source||'', checked:false, note:o.note||'', ph:o.ph?1:0, at:new Date().toLocaleString()};
+  rows.push(r); return privSave(rows) ? r : null; }
+function privPhoto(r, full, thumb){ try { localStorage.setItem('gl_th_'+r.id, thumb); } catch(e) {} if (full && full.length <= 150000) { try { localStorage.setItem('gl_pf_'+r.id, full); } catch(e) {} } }
+function privCall(fn, a){
+  var rows = privLoad(), id = a[1], f = function(x){ return x.id===id; };
+  function done(msg){ var s = privState(); return Promise.resolve(msg ? {msg:msg, list:s} : s); }
+  if (fn==='apiGetList') return done();
+  if (fn==='apiPhotoThumbs') return Promise.resolve({});
+  if (fn==='apiPhoto'){ var pf = null; try { pf = localStorage.getItem('gl_pf_'+id) || localStorage.getItem('gl_th_'+id); } catch(e) {} return Promise.resolve({data:pf}); }
+  if (fn==='apiAdd'){ var t = String(a[1]||'').trim(); privNew({item:t.charAt(0).toUpperCase()+t.slice(1), category:privWho(t), source:'Private'}); return done('Saved, only on this phone.'); }
+  if (fn==='apiAddLink') return _netCall('apiReadLink', KEY, a[3]).then(function(L){
+    var r = privNew({item:L.title, category:privWho(a[4]), source:'Link', note:[L.price, a[4]?'Note: '+a[4]:'', 'Link: '+L.link].filter(Boolean).join(' | '), ph:!!L.thumb});
+    if (r && L.thumb) privPhoto(r, L.full || L.thumb, L.thumb); return {msg:'Saved '+L.title+', only on this phone.', list:privState()}; });
+  if (fn==='apiAddPhoto') return _netCall('apiReadPhoto', KEY, a[4], a[3]).catch(function(){ return null; }).then(function(ai){
+    var note = a[3]||'', item = (ai && ai.item) || note.replace(/\bfor\s+\w+\b/i,'').trim() || 'Photo idea';
+    var r = privNew({item:item.charAt(0).toUpperCase()+item.slice(1), category:(ai && privPeople().indexOf(ai.for_who)>-1 && ai.for_who) || privWho(note), source:'Photo', note:[ai && ai.details, note?'Note: '+note:''].filter(Boolean).join(' | '), ph:true});
+    if (r) privPhoto(r, a[4], a[5]); return {msg:'Saved '+item+', only on this phone.', list:privState()}; });
+  var r = rows.filter(f)[0];
+  if (fn==='apiToggle' && r) r.checked = !!a[2];
+  if (fn==='apiRename' && r) r.item = a[2];
+  if ((fn==='apiSetFor' || fn==='apiSetCategory') && r) r.category = a[2];
+  if (fn==='apiSetPin' && r){ var parts = String(r.note||'').split(' | ').filter(function(x){ return x && x!=='Pinned'; }); if (a[2]) parts.unshift('Pinned'); r.note = parts.join(' | '); }
+  if (fn==='apiDelete'){ rows = rows.filter(function(x){ return x.id!==id; }); try { localStorage.removeItem('gl_th_'+id); localStorage.removeItem('gl_pf_'+id); } catch(e) {} }
+  if (fn==='apiClearChecked'){ rows.filter(function(x){ return x.checked; }).forEach(function(x){ try { localStorage.removeItem('gl_th_'+x.id); localStorage.removeItem('gl_pf_'+x.id); } catch(e) {} }); rows = rows.filter(function(x){ return !x.checked; }); }
+  privSave(rows); return done();
+}
+var _netCall = call;
+call = function(fn){ var a = [].slice.call(arguments, 1);
+  if (PRIV_FNS[fn] && (a.indexOf(PRIV) > -1 || (typeof a[1]==='string' && /^pv/.test(a[1])))) return privCall(fn, a);
+  return _netCall.apply(null, arguments); };
+
+/* ---- GL1.15 first-use tour ---- */
+var TOUR = [
+  ['Welcome to Our Lists '+E(0x1f44b), 'Shared family lists, meals and gift ideas. Here is a 30 second tour.', null],
+  ['Add things', 'Type, or tap the mic and say "milk, eggs and bananas". Shopping sorts itself by aisle.', '.bar'],
+  ['Tick and options', 'Tap an item to tick it off. Tap the three dots to move, rename, pin or remove it.', '#list'],
+  ['Your lists', 'Lists are the tabs across the top. "+ New list" makes one, and "Order" puts them in your order.', '#tabs'],
+  ['Gift ideas', 'On gift lists, take a photo or paste an Amazon link and say who it is for. It files it under that person.', '#tabs'],
+  ['Just me '+E(0x1f512), 'A private list that stays on this phone only: gifts for each other and private notes.', '#tabs'],
+  ['Chat', 'Quick notes about shopping and meals. "I\'m at the store" tells the other person. Turn on email alerts there.', '#tabs'],
+  ['Make it yours', 'Tap Style to change the look and colours.', '#lookbtn']];
+function tour(force){
+  try { if (!force && localStorage.getItem('gl_tour1')) return; } catch(e) {}
+  var i = 0, bg = document.createElement('div'); bg.className = 'tour-bg'; bg.id = 'tourbg'; document.body.appendChild(bg);
+  function hi(sel){ document.querySelectorAll('.tour-hi').forEach(function(x){ x.classList.remove('tour-hi'); }); var el = sel && document.querySelector(sel); if (el){ el.classList.add('tour-hi'); } }
+  function end(){ hi(null); bg.remove(); try { localStorage.setItem('gl_tour1','1'); } catch(e) {} }
+  function draw(){ var t = TOUR[i];
+    bg.innerHTML = '<div class="tour"><h4>'+t[0]+'</h4><p>'+esc(t[1])+'</p><div class="row"><div class="dots">'+TOUR.map(function(x,j){ return '<i class="'+(j===i?'on':'')+'"></i>'; }).join('')+'</div>'+
+      (i<TOUR.length-1?'<button class="skip" id="tskip">Skip</button>':'')+'<button id="tnext">'+(i<TOUR.length-1?'Next':'Done')+'</button></div></div>';
+    hi(t[2]); $('tnext').onclick = function(){ if (++i >= TOUR.length) end(); else draw(); }; if ($('tskip')) $('tskip').onclick = end; }
+  draw();
+}
 $('lookbtn').onclick = openLooks;
 applyLook();
 
@@ -1078,11 +1194,12 @@ function askWho(){
   $('sheet').innerHTML = '<h3>Whose phone is this?</h3><div class="sub">So the list shows who added what.</div>'+
     '<div class="who"><button data-w="Lucas" style="background:'+WHO_COLOR.Lucas+'">Lucas</button><button data-w="Brittany" style="background:'+WHO_COLOR.Brittany+'">Brittany</button></div>';
   $('sheet').classList.add('open'); $('sbg').classList.add('open');
-  $('sheet').querySelectorAll('[data-w]').forEach(function(b){ b.onclick=function(){ who=b.dataset.w; try{localStorage.setItem('gl_who',who);}catch(e){} closeSheet(); toast('Hi '+who+'! '+E(0x1f44b)); }; });
+  $('sheet').querySelectorAll('[data-w]').forEach(function(b){ b.onclick=function(){ who=b.dataset.w; try{localStorage.setItem('gl_who',who);}catch(e){} closeSheet(); toast('Hi '+who+'! '+E(0x1f44b)); render(); setTimeout(tour, 600); }; });
 }
 
 if (!window.GL_NOKEY) { applyTheme(); load(); if (!who) askWho(); }
 setTimeout(function(){ if (!window.GL_NOKEY && KEY) sharedLink(); }, 900);
+setTimeout(function(){ if (!window.GL_NOKEY && who) tour(); }, 1500);
 setInterval(function(){ if (!window.GL_NOKEY && !document.hidden && !rec && !gListen && !$('dlgbg').classList.contains('open')) load(); }, 20000);
 document.addEventListener('visibilitychange', function(){ if (!window.GL_NOKEY && !document.hidden) load(); });
 </script>
