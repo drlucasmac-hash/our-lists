@@ -441,6 +441,22 @@ html[data-look="midnight"] .thumb{border-radius:2px;border:1px solid var(--line2
 .tour .row{display:flex;align-items:center;gap:8px}.tour .dots{flex:1;display:flex;gap:5px}.tour .dots i{width:7px;height:7px;border-radius:4px;background:var(--line,#ddd)}.tour .dots i.on{background:var(--accent,#ff7a1a);width:18px}
 .tour button{border:0;font:inherit;font-weight:800;font-size:15px;padding:10px 16px;border-radius:999px;background:var(--accent,#ff7a1a);color:var(--accent-ink,#fff)}.tour button.skip{background:none;color:var(--muted,#888);font-weight:600}
 .tour-hi{position:relative;z-index:81;box-shadow:0 0 0 4px #fff,0 0 0 8px #ff7a1a !important;border-radius:14px}
+/* GL1.16 bulk gift links: paste many, preview cards, Add all */
+.lnk{background:var(--accent-soft);color:var(--accent);display:none}
+.lnk.on{display:grid}
+.gpaste{width:100%;box-sizing:border-box;min-height:120px;border:2px solid var(--line);border-radius:14px;padding:10px 12px;font:inherit;font-size:15px;background:var(--bg);color:var(--ink);resize:vertical}
+.gcards{display:flex;flex-direction:column;gap:10px;margin:12px 0 4px}
+.gcard{display:flex;gap:10px;align-items:flex-start;background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:10px}
+.gcard.off{opacity:.45}
+.gcard input[type=checkbox]{width:22px;height:22px;margin:4px 0 0;flex:none;accent-color:var(--accent)}
+.gcard .gimg{width:64px;height:64px;flex:none;border-radius:12px;object-fit:contain;background:#fff;display:grid;place-items:center;font-size:26px}
+.gcard .gmid{flex:1;min-width:0}
+.gcard .gname{width:100%;box-sizing:border-box;border:0;border-bottom:2px solid var(--line);background:none;color:var(--ink);font:inherit;font-weight:800;font-size:16px;padding:2px 0 4px}
+.gcard .gmeta{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:4px;word-break:break-word}
+.gcard .gdup{font-size:12.5px;font-weight:800;color:#c2410c;margin-top:4px}
+.gcard .gnop{font-size:12.5px;font-weight:700;color:var(--muted);margin-top:4px}
+.gcard select{margin-top:6px;font:inherit;font-size:14px;font-weight:700;border:2px solid var(--line);border-radius:999px;padding:5px 10px;background:var(--card);color:var(--ink)}
+.ver{text-align:center;color:var(--muted);font-size:11.5px;font-weight:600;margin:-128px 0 136px;opacity:.75}
 </style>
 </head>
 <body>
@@ -450,6 +466,7 @@ html[data-look="midnight"] .thumb{border-radius:2px;border:1px solid var(--line2
   <nav class="tabs" id="tabs"></nav>
 </div>
 <main id="list"></main>
+<div class="ver" id="ver">Our Lists GL1.16 &#xb7; updated Nov 24 2026</div>
 
 <div class="bar"><form id="f" autocomplete="off">
   <button type="button" class="round mic" id="mic" aria-label="Speak items">
@@ -457,6 +474,9 @@ html[data-look="midnight"] .thumb{border-radius:2px;border:1px solid var(--line2
   </button>
   <button type="button" class="round cam" id="cam" aria-label="Take a photo">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+  </button>
+  <button type="button" class="round lnk" id="lnk" aria-label="Paste shop links">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>
   </button>
   <input type="file" id="camf" accept="image/*" capture="environment" style="display:none">
   <input id="t" placeholder="Add milk, eggs, bananas&#x2026;" enterkeyhint="done">
@@ -697,6 +717,7 @@ function renderTabs(){
   applyTheme();
   $('t').placeholder = cur===MEALS ? LK().phMeals : cur===CHAT ? 'Message '+(who==='Brittany'?'Lucas':who==='Lucas'?'Brittany':'the family')+'...' : state.sorted ? LK().ph : LK().phNote;
   $('cam').classList.toggle('on', cur!==MEALS && cur!==CHAT && !state.sorted);
+  $('lnk').classList.toggle('on', cur!==MEALS && cur!==CHAT && !state.sorted);
 }
 function render(){
   renderTabs();
@@ -899,6 +920,7 @@ function add(text){
   if (cur===MEALS){ toast('Thinking...'); call('apiMealTalk',KEY,text,who||'').then(function(r){ toast(r.msg); setMeals(r.meals); }).catch(fail); return; }
   if (cur===CHAT){ if (chatData) { chatData.msgs.push({n:0, who:who||'', text:text, at:'sending...'}); renderChat(); } call('apiChatSend',KEY,who||'',text).then(setChat).catch(fail); return; }
   var lk = text.match(/https?:\/\/\S+/);
+  if (lk && !state.sorted){ openBulk(text, cur); return; } // GL1.16: always preview (Lucas, Nov 22)
   if (lk){ addLink(cur, lk[0], text.replace(lk[0],'').trim()); return; }
   toast('Adding...');
   call('apiAdd',KEY,text,who||'',cur).then(function(d){ toast(d.msg); set(d.list); }).catch(fail);
@@ -1091,10 +1113,58 @@ function sharedLink(){
   if (history.replaceState) history.replaceState(null, '', location.pathname + location.hash);
   var names = (state.lists||[]).map(function(l){ return l.name; });
   var list = (cur!==MEALS && !state.sorted) ? cur : (names.filter(function(n){ return /gift/i.test(n); })[0] || 'Gift Ideas');
-  ask({title:'Add this to '+list+'?', text:url, input:true, placeholder:'Who is it for? (optional)', ok:'Add'}).then(function(v){
-    if (v===null || v===undefined) return;
-    if (cur!==list) go(list);
-    addLink(list, url, v); });
+  if (cur!==list) go(list);
+  var tx = sp.get('text') || ''; openBulk((tx.indexOf(url) > -1 ? tx : tx + ' ' + url).trim(), list);
+}
+/* ---- GL1.16 bulk gift links (Lucas Sun Nov 22 2026): paste one or many links, with names, then check the cards and Add all ---- */
+function linkCount(t){ return (String(t||'').match(/https?:\/\/\S+/g)||[]).length; }
+$('t').addEventListener('paste', function(e){
+  if (cur===MEALS || cur===CHAT || state.sorted) return;
+  var t = (e.clipboardData || window.clipboardData); t = t && t.getData('text'); if (!t || !linkCount(t)) return;
+  e.preventDefault(); openBulk(($('t').value ? $('t').value+' ' : '')+t, cur); $('t').value = ''; });
+$('lnk').onclick = function(){ openBulk('', cur); };
+function openBulk(text, list){
+  list = list || cur; $('t').value = '';
+  $('sheet').innerHTML = '<h3>'+em(E(0x1f381))+'Add gift links</h3><div class="sub">Paste one or many shop links. Put a name on the line or above it, like "Chloe:" or "for Lexi".</div>'+
+    '<textarea class="gpaste" id="gtext" placeholder="Chloe:&#10;- https://a.co/... size 8&#10;For Lexi https://www.amazon.ca/...">'+esc(text||'')+'</textarea>'+
+    '<button class="gbtn" id="gread">Read the links</button><div id="gout"></div>';
+  $('sheet').classList.add('open'); $('sbg').classList.add('open');
+  $('gread').onclick = function(){ readBulk($('gtext').value, list); };
+  if (linkCount(text)) readBulk(text, list); else setTimeout(function(){ $('gtext').focus(); }, 250);
+}
+function readBulk(text, list){
+  var n = linkCount(text); if (!n){ toast('No links found. Paste a shop link.'); return; }
+  $('gread').disabled = true; $('gread').textContent = 'Reading '+n+(n===1?' link':' links')+'...';
+  _netCall('apiGiftPreview', KEY, list, text).then(function(P){ drawCards(P, list); })
+    .catch(function(e){ $('gread').disabled = false; $('gread').textContent = 'Read the links';
+      toast(navigator.onLine===false ? 'Links need signal. Try again when you have it.' : String(e && e.message || 'Could not read those links.').replace(/^Error: /,'')); });
+}
+function drawCards(P, list){
+  var people = (P.people && P.people.length ? P.people : privPeople()), cards = P.cards;
+  cards.forEach(function(c){ c.on = !c.dup; });
+  function opt(c){ return '<select data-who>'+['<option value="">For: Anyone</option>'].concat(people.map(function(n){ return '<option'+(n===c.who?' selected':'')+' value="'+esc(n)+'">For: '+esc(n)+'</option>'; })).join('')+'</select>'; }
+  $('gout').innerHTML = '<div class="gcards">'+cards.map(function(c,i){
+    return '<div class="gcard'+(c.on?'':' off')+'" data-i="'+i+'"><input type="checkbox"'+(c.on?' checked':'')+' aria-label="Add this one">'+
+      (c.thumb ? '<img class="gimg" alt="" src="data:image/jpeg;base64,'+c.thumb+'">' : '<div class="gimg">'+E(0x1f381)+'</div>')+
+      '<div class="gmid"><input class="gname" value="'+esc(c.name)+'" aria-label="Name">'+
+      '<div class="gmeta">'+esc([c.price, c.note, (c.url||'').replace(/^https?:\/\/(www\.)?/,'').split('/')[0]].filter(Boolean).join(' \u00b7 '))+'</div>'+
+      (c.dup ? '<div class="gdup">'+esc(c.dup)+'</div>' : '')+(!c.ok ? '<div class="gnop">No preview yet. It will fill in later.</div>' : '')+opt(c)+'</div></div>'; }).join('')+'</div>'+
+    '<button class="gbtn" id="gadd"></button>';
+  function count(){ var k = cards.filter(function(c){ return c.on; }).length; $('gadd').textContent = k ? 'Add '+(k===1?'1 gift':k+' gifts')+(list===PRIV?' (only this phone)':'') : 'Nothing ticked'; $('gadd').disabled = !k; }
+  $('gout').querySelectorAll('.gcard').forEach(function(el){ var c = cards[+el.dataset.i];
+    el.querySelector('input[type=checkbox]').onchange = function(e){ c.on = e.target.checked; el.classList.toggle('off', !c.on); count(); };
+    el.querySelector('.gname').oninput = function(e){ c.name = e.target.value; };
+    el.querySelector('[data-who]').onchange = function(e){ c.who = e.target.value; }; });
+  $('gread').style.display = 'none'; $('gtext').style.display = 'none'; count();
+  $('gadd').onclick = function(){ var pick = cards.filter(function(c){ return c.on; }); if (!pick.length) return;
+    closeSheet();
+    if (list===PRIV){ pick.forEach(function(c){
+        var r = privNew({item:(c.name||'Gift idea'), category:c.who||'', source:'Link', note:[c.price, c.note?'Note: '+c.note:'', 'Link: '+c.url].filter(Boolean).join(' | '), ph:!!c.thumb});
+        if (r && c.thumb) privPhoto(r, c.thumb, c.thumb); });
+      if (cur===PRIV) set(privState()); toast('Added '+pick.length+(pick.length===1?' gift':' gifts')+', only on this phone.'); return; }
+    toast('Adding '+pick.length+'...');
+    call('apiGiftAddMany', KEY, list, who||'', pick.map(function(c){ return {url:c.url, name:c.name, who:c.who, note:c.note, price:c.price, image:c.image, title:c.title, ok:c.ok}; }))
+      .then(function(d){ toast(d.msg); if (d.list && d.list.list===cur) set(d.list); }).catch(fail); };
 }
 /* ---- GL1.15 chat ---- */
 function chatSeen(){ try { return +(localStorage.getItem('gl_chat_seen')||0); } catch(e) { return 0; } }
@@ -1171,7 +1241,7 @@ var TOUR = [
   ['Add things', 'Type, or tap the mic and say "milk, eggs and bananas". Shopping sorts itself by aisle.', '.bar'],
   ['Tick and options', 'Tap an item to tick it off. Tap the three dots to move, rename, pin or remove it.', '#list'],
   ['Your lists', 'Lists are the tabs across the top. "+ New list" makes one, and "Order" puts them in your order.', '#tabs'],
-  ['Gift ideas', 'On gift lists, take a photo or paste an Amazon link and say who it is for. It files it under that person.', '#tabs'],
+  ['Gift ideas', 'On gift lists, take a photo, or paste one or many Amazon links with names. You check the cards, then Add all.', '#tabs'],
   ['Just me '+E(0x1f512), 'A private list that stays on this phone only: gifts for each other and private notes.', '#tabs'],
   ['Chat', 'Quick notes about shopping and meals. "I\'m at the store" tells the other person. Turn on email alerts there.', '#tabs'],
   ['Make it yours', 'Tap Style to change the look and colours.', '#lookbtn']];
